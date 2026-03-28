@@ -1,0 +1,86 @@
+\section{Preliminary on proximal standardization formulas}
+
+\begin{figure}[ht]
+    \centering
+    \begin{tikzpicture}[
+        every node/.style={draw, circle, minimum size=1cm},
+        every path/.style={->, >=Stealth}
+    ]
+    % Define nodes
+    \node (U) at (3,5) {$U$};
+    \node (X) at (3,3) {$X$};
+    \node (Z) at (0,3) {$Z$};
+    \node (W) at (6,3) {$W$};
+    \node (A) at (1,1) {$A$};
+    \node (Y) at (5,1) {$Y$};
+    % Draw edges
+    \draw (U) -- (X);
+    \draw (U) -- (Z);
+    \draw (U) -- (W);
+    \draw (U) -- (A);
+    \draw (U) -- (Y);
+    \draw (X) -- (Z);
+    \draw (X) -- (W);
+    \draw (X) -- (A);
+    \draw (X) -- (Y);
+    \draw (A) -- (Y);
+    \draw (Z) -- (A);
+    \draw (W) -- (Y);
+    \end{tikzpicture}
+    \caption{\centering A DAG for proximal counterfactual model}
+    \label{fig: pre_dagprox}
+\end{figure}
+
+Standardization in proximal causal framework is closely related to the proxy variables by the existence of the unobservable confounders. 
+There are two classes of proxies. 
+For those connecting both unobservable confounders and outcome, we call them outcome confounding proxies represented by $W$ in Figure \ref{fig: pre_dagprox}, 
+while variables lying in between the treatment and unobservable confounders are treatment confounding proxies which is the node $Z$. 
+Miao et al.\cite{WMiao2018} put forward a standardization formula using the outcome confounding proxies 
+and Cui et al.\cite{YFCui2023} managed to identify the ATE with the treatment confounding proxies. 
+Their identification methods require solving functions from Fredholm integral equations of the first kind. 
+The solutions are called bridge functions because 
+they remove the influence from the unobservable confounders 
+and make it possible to identify ATE only with the observed. 
+Moreover, the standardization formulas also depend on the completeness assumption on the distribution families of the confounder variables. 
+We restate the important assumptions proposed by the pioneers in proximal causal inference as baseline for the later derivations.
+
+\begin{assumption}(\textbf{Outcome confounding standardization formula}\cite{WMiao2018})
+    
+    \label{ass: pre_outcomehold}
+    \begin{enumerate}
+        \item \textbf{Completeness}: The distribution family for confounder variables $U,Z,A,X$ satisfies that 
+                for any square-integrable function $g$ and for any $a$, $x$, $E[g(U)|Z, A = a, X = x] = 0$ almost surely if and only if $g(U) = 0$ almost surely. 
+        \item \textbf{Existence of outcome confounding bridge function}: Denote the singular system of the conditional expectation operator $T: L_2(P_{(W,A,X)})\mapsto L_2(P_{(Z,A,X)})$ by $(\sigma_i, u_i, v_i)_{i\geq 1}$. 
+                Then Picard's condition $\sum_{i\geq 1}\frac{|\left\langle E[Y|Z,A=a,X], v_i\right\rangle|^2}{\sigma^2_i}<\infty$ holds to make 
+                integral equation
+                \begin{equation}
+                    \label{eq: pre_outbridge}
+                    E[Y|Z,A=a,X] = \int h_a(w,A,X)dF(w|Z,A=a,X) = E[h_a(W,a,X)|Z,A=a,X], 
+                \end{equation}
+                solvable. 
+    \end{enumerate}
+\end{assumption}
+
+\begin{assumption}(\textbf{Treatment confounding standardization formula}\cite{YFCui2023})
+
+    \label{ass: pre_treatmenthold}
+    \begin{enumerate}
+        \item \textbf{Completeness}: The distribution family for confounder variables $U,W,A,X$ satisfies that 
+                for any square-integrable function $g$ and for any $a$, $x$, $E[g(U)|W, A = a, X = x] = 0$ almost surely if and only if $g(U) = 0$ almost surely.
+        \item \textbf{Existence of treatment confounding bridge function}: Denote the singular system of the conditional expectation operator $T^*: L_2(P_{(Z,A,X)})\mapsto L_2(P_{(W,A,X)})$ by $(\sigma^*_i, u^*_i, v^*_i)_{i\geq 1}$. 
+                Then Picard's condition $\sum_{i\geq 1}\frac{|\left\langle \frac{1}{f(a|W,X)},v^*_i\right\rangle|^2}{(\sigma^*_i)^2}<\infty$ holds to make 
+                integral equation solvable
+                \begin{equation}
+                    \label{eq: pre_treatbridge}
+                    \frac{1}{f(a|W,X)} = \int q_a(z,A,X)dF(z|W,A=a,X) = E[q_a(Z,a,X)|W,A=a,X],
+                \end{equation}
+                where $f(a|W,X)=Pr\left\{A=a|W,X\right\}$.
+    \end{enumerate}
+\end{assumption}
+
+If Assumptions \ref{ass: pre_outcomehold} and \ref{ass: pre_treatmenthold} hold, then we have the two standardization formulas, 
+\begin{align*}
+    E[Y^a] &= E[h_a(W,a,X)], \\
+    E[Y^a] &= E[Yq_a(Z,a,X)\mathbb{1}_{A=a}].
+\end{align*}
+for all categories of $a$.
