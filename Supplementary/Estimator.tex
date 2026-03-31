@@ -1,4 +1,4 @@
-\section{Kernel embedded ATE estimator}
+\section{Kernel embedded doubly robust ATE estimator}
 
 To estimate ATE in proximal causal framework, we adopt the dual kernel embedding method 
 which was proposed by Dai et al.\cite{dai2017learning} to address the problem of learning from conditional distributions. 
@@ -16,9 +16,10 @@ obtained a closed-form solution in RKHS to approximate the causal functions in i
 Given the similarity between the integral equation for establishing the existence of bridge functions and instrumental variable regression, 
 we apply the dual kernel embedding method to approximate the true boundedly continuous bridge functions $q_a$ and $h_a$ on RKHSs. 
 And then to estimate ATE by plugging estimated bridge functions in the empirical form of the doubly robust standardization formula\cite{YFCui2023} 
-\begin{equation*}
-    \chi_{PDR} = E[\mathbb{1}_{A=1}q_1(Z,1,X)[Y-h_1(W,1,X)] - \mathbb{1}_{A=0}q_0(Z,0,X)[Y-h_0(W,0,X)] + h_1(W, 1, X)-h_0(W,0,X)].
-\end{equation*} 
+\begin{equation}
+    \label{eq: est_PDR}
+    \chi = E[\mathds{1}_{A=1}q_1(Z,1,X)[Y-h_1(W,1,X)] - \mathds{1}_{A=0}q_0(Z,0,X)[Y-h_0(W,0,X)] + h_1(W, 1, X)-h_0(W,0,X)].
+\end{equation} 
 
 We start by giving a detailed derivation of finding the closed-form kernel embedded approximator $q^*_a$ on a RKHS of $q_a$ and its empirical form $\widehat{q}^*_a$. 
 Then derive $h^*_a$ and $\widehat{h}^*_a$ with the simplest description.
@@ -32,8 +33,8 @@ We give the equivalent form of this hard-to-tackle problem by tower property of 
     \label{eq: est_newintegral}
     \frac{1}{f(a|W,X)} &= E[q_a(Z,a,X)|W,A=a,X] \notag\\
     1 &= E[q_a(Z,a,X)|W,A=a,X]f(a|W,X) \notag\\
-    1 &= E_A[E_Z[\mathbb{1}_{A=a}q_a(Z,a,X)|W,A,X]|W,X] \notag\\
-    1 &= E_{ZA}[\mathbb{1}_{A=a}q_a(Z,a,X)|W,X]. 
+    1 &= E_A[E_Z[\mathds{1}_{A=a}q_a(Z,a,X)|W,A,X]|W,X] \notag\\
+    1 &= E_{ZA}[\mathds{1}_{A=a}q_a(Z,a,X)|W,X]. 
 \end{align}
 
 Then we perform the ERM reformulation of (\ref{eq: est_newintegral}).
@@ -43,14 +44,14 @@ Then we perform the ERM reformulation of (\ref{eq: est_newintegral}).
     the expected risk minimization problem with square loss for 1-dim data $l(x,y)=\frac{1}{2}(x-y)^2$ 
     \begin{equation}
         \label{eq: est_ERMreform}
-        \min_{q_a\in L_2(P_{(Z,X|W,X)})} E_{W,X}[l(1, E_{ZA}[\mathbb{1}_{A=a}q_a(Z,a,X)|W,X])]. 
+        \min_{q_a\in L_2(P_{(Z,X|W,X)})} E_{W,X}[l(1, E_{ZA}[\mathds{1}_{A=a}q_a(Z,a,X)|W,X])]. 
     \end{equation}
 \end{lemma}
 \begin{proof}
     First we consider the solution of $E_{W,X}[\frac{1}{2}(1-S(W,X))^2]$.
     For all $S\in L_2(P_{(W,X)})$, 
     since $E_{W,X}[\frac{1}{2}(1-S(W,X))^2]\geq0$ and it reaches the minimum 0 within a function class $\{S: E[S(W,X)]=1\}\subseteq L_2(P_{(W,X)})$,   
-    it is clear that $E_Z[\mathbb{1}_{A=a}q_a^{\star}(Z,a,X)|W,X]\in\{S: E[S(W,X)]=1\}$ by Equation (\ref{eq: est_newintegral}). 
+    it is clear that $E_Z[\mathds{1}_{A=a}q_a^{\star}(Z,a,X)|W,X]\in\{S: E[S(W,X)]=1\}$ by Equation (\ref{eq: est_newintegral}). 
     Hence the true solution $q_a^{\star}(Z,a,X)$ for integral equation (\ref{eq: est_newintegral}) solves the ERM problem. 
 \end{proof}
 
@@ -62,7 +63,7 @@ Next comes the minimax problem reformulation of ERM form.
     minimax problem 
     \begin{equation}
         \label{eq: est_saddlereform}
-        \min_{q_a\in L_2(P_{(Z,X|W,X)})} \max_{u(\cdot,\cdot)\in\mathcal{M}(W,X)} E_{Z,W,A,X}[(\mathbb{1}_{A=a}q_a(Z,a,X)-1)u(W,X)]-\frac{1}{2}E_{W,X}[u^2(W,X)], 
+        \min_{q_a\in L_2(P_{(Z,X|W,X)})} \max_{u(\cdot,\cdot)\in\mathcal{M}(W,X)} E_{Z,W,A,X}[(\mathds{1}_{A=a}q_a(Z,a,X)-1)u(W,X)]-\frac{1}{2}E_{W,X}[u^2(W,X)], 
     \end{equation} 
     where $\mathcal{M}(W,X)$ is the space of all measurable functions from $\mathcal{W}\times\mathcal{X}\mapsto\mathbb{R}$. 
 \end{lemma}
@@ -70,11 +71,11 @@ Next comes the minimax problem reformulation of ERM form.
     For simplicity, we denote the square loss function $l(x,y)$ by $l_x(y)$. 
     Its convex conjugate function is defined as $l_x^*(y):=\max_{u\in\mathbb{R}}\{uy-l_x(u)\}$.
     \begin{align}
-         & \min_{q_a\in L_2(P_{(Z,X|W,X)})} E_{W,X}[l_1(E_{ZA}[\mathbb{1}_{A=a}q_a(Z,a,X)|W,X])] \notag\\
-        =& \min_{q_a\in L_2(P_{(Z,X|W,X)})} E_{W,X}[\max_{u\in\mathbb{R}}\left\{uE_{ZA}[\mathbb{1}_{A=a}q_a(Z,a,X)|W,X]-l^*_1(u)\right\}] \notag\\                                                   
-        =& \min_{q_a\in L_2(P_{(Z,X|W,X)})} E_{W,X}[\max_{u\in\mathbb{R}}\left\{uE_{ZA}[\mathbb{1}_{A=a}q_a(Z,a,X)|W,X]-u-\frac{1}{2}u^2\right\}] \label{eq: est_saddlereform1}\\
-        =& \min_{q_a\in L_2(P_{(Z,X|W,X)})} \max_{u(\cdot,\cdot)\in\mathcal{M}(W,X)} E_{W,X}[u(W,X)E_{ZA}[\mathbb{1}_{A=a}q_a(Z,a,X)|W,X]-u(W,X)-\frac{1}{2}u^2(W,X)] \label{eq: est_saddlereform2}\\
-        =& \min_{q_a\in L_2(P_{(Z,X|W,X)})} \max_{u(\cdot,\cdot)\in\mathcal{M}(W,X)} E_{Z,W,A,X}[(\mathbb{1}_{A=a}q_a(Z,a,X)-1)u(W,X)]-\frac{1}{2}E_{W,X}[u^2(W,X)]. \notag
+         & \min_{q_a\in L_2(P_{(Z,X|W,X)})} E_{W,X}[l_1(E_{ZA}[\mathds{1}_{A=a}q_a(Z,a,X)|W,X])] \notag\\
+        =& \min_{q_a\in L_2(P_{(Z,X|W,X)})} E_{W,X}[\max_{u\in\mathbb{R}}\left\{uE_{ZA}[\mathds{1}_{A=a}q_a(Z,a,X)|W,X]-l^*_1(u)\right\}] \notag\\                                                   
+        =& \min_{q_a\in L_2(P_{(Z,X|W,X)})} E_{W,X}[\max_{u\in\mathbb{R}}\left\{uE_{ZA}[\mathds{1}_{A=a}q_a(Z,a,X)|W,X]-u-\frac{1}{2}u^2\right\}] \label{eq: est_saddlereform1}\\
+        =& \min_{q_a\in L_2(P_{(Z,X|W,X)})} \max_{u(\cdot,\cdot)\in\mathcal{M}(W,X)} E_{W,X}[u(W,X)E_{ZA}[\mathds{1}_{A=a}q_a(Z,a,X)|W,X]-u(W,X)-\frac{1}{2}u^2(W,X)] \label{eq: est_saddlereform2}\\
+        =& \min_{q_a\in L_2(P_{(Z,X|W,X)})} \max_{u(\cdot,\cdot)\in\mathcal{M}(W,X)} E_{Z,W,A,X}[(\mathds{1}_{A=a}q_a(Z,a,X)-1)u(W,X)]-\frac{1}{2}E_{W,X}[u^2(W,X)]. \notag
     \end{align}
     Since the square loss function $\frac{1}{2}(x-y)^2$ is a convex and continuous real function on $\mathbb{R}$ given a fixed $x$, 
     $(l_1^*,l_1)$ are dual to each other, 
@@ -97,7 +98,7 @@ Below we give two important properties of the optimal dual function $u^*(W,X)$.
 \begin{proposition}(\textbf{Uniqueness})
     
     \label{prop: est_uniqdualf}
-    The optimal dual function $u^*$ is uniquely defined by $u^*(W,X)=E_{ZA}[\mathbb{1}_{A=a}q_a(Z,a,X)|W,X]-1$.  
+    The optimal dual function $u^*$ is uniquely defined by $u^*(W,X)=E_{ZA}[\mathds{1}_{A=a}q_a(Z,a,X)|W,X]-1$.  
 \end{proposition}
 The uniqueness of $u^*$ is due to the strict concavity of the function in minimax problem (\ref{eq: est_saddlereform}). 
 Its explicit form is derived by the derivative with respect to $u$. 
@@ -107,12 +108,12 @@ Its explicit form is derived by the derivative with respect to $u$.
     \label{prop: est_contdualf}
     The optimal dual function $u^*(W,X)$ is bounded continuous on $\mathcal{W}\times\mathcal{X}$ if 
     \begin{itemize}
-        \item for $a\in\mathcal{A}$, $\mathbb{1}_{A=a}q_a(Z,a,X)$ is continuous in both $Z$ and $X$ or at least continuous in $Z$ for any $X$; 
+        \item for $a\in\mathcal{A}$, $\mathds{1}_{A=a}q_a(Z,a,X)$ is continuous in both $Z$ and $X$ or at least continuous in $Z$ for any $X$; 
         \item the conditional density $p(Z|W,a,X)$ and conditional probability $f(a|W,X)$ are continuous at any $(W,X)\in\mathcal{W}\times\mathcal{X}$. 
     \end{itemize} 
 \end{proposition}
 \begin{proof}
-    The two continuity assumptions make sure $E_{ZA}[\mathbb{1}_{A=a}q_a(Z,a,X)|W,X]$ is a bounded continuous function of $(W,X)$. 
+    The two continuity assumptions make sure $E_{ZA}[\mathds{1}_{A=a}q_a(Z,a,X)|W,X]$ is a bounded continuous function of $(W,X)$. 
     Since the derivative of square loss $l_1(\cdot)$ is continuous, 
     combining the result in Proposition \ref{prop: est_uniqdualf}, 
     we have the bounded continuity of the optimal dual function. 
@@ -134,7 +135,7 @@ Since $\mathcal{C}_0(W,X)\subseteq\mathcal{M}(W,X)$ and $\mathcal{C}_0(Z,X)\subs
 under Assumption \ref{ass: est_contqbridge}, we can restrict the minimax problem (\ref{eq: est_saddlereform}) to 
 \begin{equation}
     \label{eq: est_intermediateform0}
-    \min_{q_a\in \mathcal{C}_0(Z,X)} \max_{u\in\mathcal{C}_0(W,X)} E_{Z,W,A,X}[(\mathbb{1}_{A=a}q_a(Z,a,X)-1)u(W,X)]-\frac{1}{2}E_{W,X}[u^2(W,X)]. 
+    \min_{q_a\in \mathcal{C}_0(Z,X)} \max_{u\in\mathcal{C}_0(W,X)} E_{Z,W,A,X}[(\mathds{1}_{A=a}q_a(Z,a,X)-1)u(W,X)]-\frac{1}{2}E_{W,X}[u^2(W,X)]. 
 \end{equation}
 
 By the definition of universal kernels, the RKHS induced by a universal kernel is dense in the space of bounded continuous functions. 
@@ -142,7 +143,7 @@ We can further restrict (\ref{eq: est_intermediateform0}) to a minimax problem f
 This gives 
 \begin{equation}
     \label{eq: est_intermediateform}
-    \min_{q_a\in F} \max_{u\in H} E_{Z,W,A,X}[(\mathbb{1}_{A=a}q_a(Z,a,X)-1)u(W,X)]-\frac{1}{2}E_{W,X}[u^2(W,X)]. 
+    \min_{q_a\in F} \max_{u\in H} E_{Z,W,A,X}[(\mathds{1}_{A=a}q_a(Z,a,X)-1)u(W,X)]-\frac{1}{2}E_{W,X}[u^2(W,X)]. 
 \end{equation}
 
 Although we have changed the searching space of optimal functions to RKHSs, 
@@ -158,7 +159,7 @@ This helps transfer (\ref{eq: est_intermediateform}) to a kernel embedded minima
     For any two universal kernels $k: (\mathcal{W}\times\mathcal{X})\times(\mathcal{W}\times\mathcal{X})\mapsto\mathbb{R}$ 
     and $\tilde{l}: (\mathcal{Z}\times\mathcal{X})\times(\mathcal{Z}\times\mathcal{X})\mapsto\mathbb{R}$, 
     we denote $H$, $\tilde{F}$ and $F$ by RKHSs induces by $k$, $\tilde{l}$ and $l$, 
-    where $l: (\mathcal{Z}\times\mathcal{A}\times\mathcal{X})\times(\mathcal{Z}\times\mathcal{A}\times\mathcal{X})\mapsto\mathbb{R}$ is defined by $l((Z,A,X),(Z',A',X')):=\mathbb{1}_{A=a}\mathbb{1}_{A'=a}\tilde{l}((Z,X),(Z',X'))$. 
+    where $l: (\mathcal{Z}\times\mathcal{A}\times\mathcal{X})\times(\mathcal{Z}\times\mathcal{A}\times\mathcal{X})\mapsto\mathbb{R}$ is defined by $l((Z,A,X),(Z',A',X')):=\mathds{1}_{A=a}\mathds{1}_{A'=a}\tilde{l}((Z,X),(Z',X'))$. 
     The corresponding feature maps of $k$, $\tilde{l}$ and $l$ are given by $\phi:\mathcal{W}\times\mathcal{X}\mapsto H$,  
     $\tilde{\psi}: \mathcal{Z}\times\mathcal{X}\mapsto \tilde{F}$ and $\psi:\mathcal{Z}\times\mathcal{A}\times\mathcal{X}\mapsto F$. 
     Denote the Hilbert-Schmidt Riesz representatives of (cross-)covariance operators by the operator $C_{(ZAX)(WX)}$ from $F$ to $H$ and the operator $C_{(WX)}$ from $H$ to $H$ respectively. 
@@ -174,14 +175,14 @@ This helps transfer (\ref{eq: est_intermediateform}) to a kernel embedded minima
     First notice that $F=\tilde{F}\bigoplus\tilde{F}$ and $q_a\in\tilde{F}\bigcap F$. Since by Moore-Aronszajn theorem \cite{drewnik2021reproducingkernelhilbertspace}, 
     $q_a$ has a representation in $F$ which is given by 
     \begin{equation*}
-        q_a = \sum_{i: a_i=a}\alpha_i\tilde{\psi}(z_i,x_i) = \sum_{i\geq 1}\alpha_i\mathbb{1}_{a_i=a}\tilde{\psi}(z_i,x_i) = \sum_{i\geq 1}\alpha_i\psi(z_i,a_i,x_i).
+        q_a = \sum_{i: a_i=a}\alpha_i\tilde{\psi}(z_i,x_i) = \sum_{i\geq 1}\alpha_i\mathds{1}_{a_i=a}\tilde{\psi}(z_i,x_i) = \sum_{i\geq 1}\alpha_i\psi(z_i,a_i,x_i).
     \end{equation*}
 
     This gives 
     \begin{align*}
         E_{WX}[u(W,X)] &= \left\langle \mu_{(WX)},u\right\rangle _{H}, \\
-        E_{Z,W,A,X}[\mathbb{1}_{A=a}q_a(Z,a,X)u(W,X)] &= E_{Z,W,A,X}\left[\mathbb{1}_{A=a}\left\langle q_a, \tilde{\psi}(Z,X)\right\rangle _{\tilde{F}} \left\langle u, \phi(W,X)\right\rangle _H\right] \\
-                                                      &= E_{Z,W,A,X}\left[\langle q_a, \underbrace{\mathbb{1}_{A=a}\tilde{\psi}(Z,X)}_{\psi(Z,A,X)}\rangle _F \left\langle u, \phi(W,X)\right\rangle _H\right] \\
+        E_{Z,W,A,X}[\mathds{1}_{A=a}q_a(Z,a,X)u(W,X)] &= E_{Z,W,A,X}\left[\mathds{1}_{A=a}\left\langle q_a, \tilde{\psi}(Z,X)\right\rangle _{\tilde{F}} \left\langle u, \phi(W,X)\right\rangle _H\right] \\
+                                                      &= E_{Z,W,A,X}\left[\langle q_a, \underbrace{\mathds{1}_{A=a}\tilde{\psi}(Z,X)}_{\psi(Z,A,X)}\rangle _F \left\langle u, \phi(W,X)\right\rangle _H\right] \\
                                                       &= \left\langle q_a\otimes u, E_{Z,W,A,X}[\psi(Z,A,X)\otimes \phi(W,X)]\right\rangle _{HS(H,F)} \\
                                                       &= \left\langle q_a\otimes u, C_{(WX)(ZAX)}\right\rangle _{HS(H,F)} \\
                                                       &= \left\langle q_a, C_{(WX)(ZAX)}u\right\rangle _F \\
@@ -325,14 +326,14 @@ we delineate the relationship between empirical (cross-)covariance embeddings an
 
 Define operators $\Phi=(\phi(w_1,x_1),\cdots,\phi(w_n,x_n)):\mathbb{R}^n\mapsto H_n$ by $\Phi\beta=\sum_{i=1}^n\beta_i\phi(w_i,x_i),\forall\beta\in\mathbb{R}^n$ 
 and its adjoint $\Phi^*:H_n\mapsto\mathbb{R}^n$ by $\Phi^*h=(\left\langle \phi(w_i,x_i),h\right\rangle_{H_n})_{i=1}^n=(h(w_i,x_i))_{i=1}^n$; 
-$\Psi=(\psi(z_1,a_1,x_1),\cdots,\psi(z_n,a_n,x_n))=(\mathbb{1}_{a_1=a}\tilde{\psi}(z_1,x_1),\cdots,\mathbb{1}_{a_n=a}\tilde{\psi}(z_n,x_n)):\mathbb{R}^n\mapsto F_n$ 
+$\Psi=(\psi(z_1,a_1,x_1),\cdots,\psi(z_n,a_n,x_n))=(\mathds{1}_{a_1=a}\tilde{\psi}(z_1,x_1),\cdots,\mathds{1}_{a_n=a}\tilde{\psi}(z_n,x_n)):\mathbb{R}^n\mapsto F_n$ 
 and its adjoint $\Psi^*:F_n\mapsto\mathbb{R}^n$, 
 where $(w_i,x_i,a_i,z_i)_{1\leq i\leq n}$ are i.i.d samples from $P_{(W,X,A,Z|U)}$. 
 Then without centering, the empirical mean embedding and empirical (cross-)covariance embeddings under the samples are given by 
 \begin{align*}
-    \widehat{C}_{(WX)} &= \frac{1}{n}\sum_{i=1}^{n} \phi(w_i,x_i)\otimes\phi(w_i,x_i)=\frac{1}{n}\Phi\Phi^*, \qquad\qquad \widehat{\mu}_{(WX)} = \frac{1}{n}\sum_{i=1}^{n}\phi(w_i,x_i)=\frac{1}{n}\Phi\mathbb{1}_n, \\
-    \widehat{C}_{(WX)(ZAX)} &= \frac{1}{n}\sum_{i=1}^{n} (\mathbb{1}_{a_i=a}\tilde{\psi}(z_i,x_i))\otimes\phi(w_i,x_i) = \frac{1}{n}\sum_{i=1}^{n} \psi(z_i,a_i,x_i)\otimes\phi(w_i,x_i) = \frac{1}{n}\Psi\Phi^*, \\
-    \widehat{C}_{(ZAX)(WX)} &= \frac{1}{n}\sum_{i=1}^{n} \phi(w_i,x_i)\otimes(\mathbb{1}_{a_i=a}\tilde{\psi}(z_i,x_i)) = \frac{1}{n}\sum_{i=1}^{n} \phi(w_i,x_i)\otimes\psi(z_i,a_i,x_i) = \frac{1}{n}\Phi\Psi^*. 
+    \widehat{C}_{(WX)} &= \frac{1}{n}\sum_{i=1}^{n} \phi(w_i,x_i)\otimes\phi(w_i,x_i)=\frac{1}{n}\Phi\Phi^*, \qquad\qquad \widehat{\mu}_{(WX)} = \frac{1}{n}\sum_{i=1}^{n}\phi(w_i,x_i)=\frac{1}{n}\Phi\mathds{1}_n, \\
+    \widehat{C}_{(WX)(ZAX)} &= \frac{1}{n}\sum_{i=1}^{n} (\mathds{1}_{a_i=a}\tilde{\psi}(z_i,x_i))\otimes\phi(w_i,x_i) = \frac{1}{n}\sum_{i=1}^{n} \psi(z_i,a_i,x_i)\otimes\phi(w_i,x_i) = \frac{1}{n}\Psi\Phi^*, \\
+    \widehat{C}_{(ZAX)(WX)} &= \frac{1}{n}\sum_{i=1}^{n} \phi(w_i,x_i)\otimes(\mathds{1}_{a_i=a}\tilde{\psi}(z_i,x_i)) = \frac{1}{n}\sum_{i=1}^{n} \phi(w_i,x_i)\otimes\psi(z_i,a_i,x_i) = \frac{1}{n}\Phi\Psi^*. 
 \end{align*}
 
 To make it consistent with the definition of $\Phi$ and $\Psi$,
@@ -351,41 +352,41 @@ The following proposition illustrates the derivation of the expressions of $\wid
     where the coefficient $\widehat{\Lambda}$ and $\widehat{\Gamma}$ are given by 
     \begin{align}
         \label{eq: est_kernelrepresentor_exact}
-        \widehat{\Lambda} &= (L(K+n\lambda_1I_n)^{-1}KL+n\lambda_2L)^{-1}L(K+n\lambda_1I_n)^{-1}K\mathbb{1}_n, \\
-        \widehat{\Gamma} &= (K+n\lambda_1I)^{-1}(L\widehat{\Lambda}-\mathbb{1}_n).
+        \widehat{\Lambda} &= (L(K+n\lambda_1I_n)^{-1}KL+n\lambda_2L)^{-1}L(K+n\lambda_1I_n)^{-1}K\mathds{1}_n, \\
+        \widehat{\Gamma} &= (K+n\lambda_1I)^{-1}(L\widehat{\Lambda}-\mathds{1}_n).
     \end{align}
 \end{proposition}
 \begin{proof}
     Substituting the kernel embeddings by their matrices versions, the empirical version (\ref{eq: est_empiricalversion}) satisfies
     \begin{align*}
         \label{eq: est_matricesversion}
-        \widehat{q}_a^* &= (\frac{1}{n}\Psi\Phi^*(\frac{1}{n}\Phi\Phi^*+\lambda_1I)^{-1}\frac{1}{n}\Phi\Psi^*+\lambda_2I)^{-1}\frac{1}{n}\Psi\Phi^*(\frac{1}{n}\Phi\Phi^*+\lambda_1I)^{-1}\frac{1}{n}\Phi\mathbb{1}_n \\
-                      &= (\Psi\Phi^*(\Phi\Phi^*+n\lambda_1I)^{-1}\Phi\Psi^*+n\lambda_2I)^{-1}\Psi\Phi^*(\Phi\Phi^*+n\lambda_1I)^{-1}\Phi\mathbb{1}_n.
+        \widehat{q}_a^* &= (\frac{1}{n}\Psi\Phi^*(\frac{1}{n}\Phi\Phi^*+\lambda_1I)^{-1}\frac{1}{n}\Phi\Psi^*+\lambda_2I)^{-1}\frac{1}{n}\Psi\Phi^*(\frac{1}{n}\Phi\Phi^*+\lambda_1I)^{-1}\frac{1}{n}\Phi\mathds{1}_n \\
+                      &= (\Psi\Phi^*(\Phi\Phi^*+n\lambda_1I)^{-1}\Phi\Psi^*+n\lambda_2I)^{-1}\Psi\Phi^*(\Phi\Phi^*+n\lambda_1I)^{-1}\Phi\mathds{1}_n.
     \end{align*}
     Apply the operator $\Psi\Phi^*(\Phi\Phi^*+n\lambda_1I)^{-1}\Phi\Psi^*+n\lambda_2I$ to both sides on the left and get
     \begin{align*}
-        (\Psi\Phi^*(\Phi\Phi^*+n\lambda_1I)^{-1}\Phi\Psi^*+n\lambda_2I)\widehat{q}_a^* &= \Psi\Phi^*(\Phi\Phi^*+n\lambda_1I)^{-1}\Phi\mathbb{1}_n \\
-        (\Psi\Phi^*(\Phi\Phi^*+n\lambda_1I)^{-1}\Phi\Psi^*+n\lambda_2I)\Psi\widehat{\Lambda} &= \Psi\Phi^*(\Phi\Phi^*+n\lambda_1I)^{-1}\Phi\mathbb{1}_n & (\widehat{q}_a^*=\Psi\widehat{\Lambda}) \\
-        (\Psi(\Phi^*\Phi+n\lambda_1I)^{-1}\Phi^*\Phi\Psi^*\Psi+n\lambda_2\Psi)\widehat{\Lambda} &= \Psi(\Phi^*\Phi+n\lambda_1I)^{-1}\Phi^*\Phi\mathbb{1}_n.
+        (\Psi\Phi^*(\Phi\Phi^*+n\lambda_1I)^{-1}\Phi\Psi^*+n\lambda_2I)\widehat{q}_a^* &= \Psi\Phi^*(\Phi\Phi^*+n\lambda_1I)^{-1}\Phi\mathds{1}_n \\
+        (\Psi\Phi^*(\Phi\Phi^*+n\lambda_1I)^{-1}\Phi\Psi^*+n\lambda_2I)\Psi\widehat{\Lambda} &= \Psi\Phi^*(\Phi\Phi^*+n\lambda_1I)^{-1}\Phi\mathds{1}_n & (\widehat{q}_a^*=\Psi\widehat{\Lambda}) \\
+        (\Psi(\Phi^*\Phi+n\lambda_1I)^{-1}\Phi^*\Phi\Psi^*\Psi+n\lambda_2\Psi)\widehat{\Lambda} &= \Psi(\Phi^*\Phi+n\lambda_1I)^{-1}\Phi^*\Phi\mathds{1}_n.
     \end{align*}
     After left applying $\Psi^*$ to the both sides, by the injection of $\Psi^*$, we get 
     \begin{align*}
-        (\Psi^*\Psi(\Phi^*\Phi+n\lambda_1I)^{-1}\Phi^*\Phi\Psi^*\Psi+n\lambda_2\Psi^*\Psi)\widehat{\Lambda} &= \Psi^*\Psi(\Phi^*\Phi+n\lambda_1I)^{-1}\Phi^*\Phi\mathbb{1}_n \\ 
-        (L(K+n\lambda_1I_n)^{-1}KL+n\lambda_2L)\widehat{\Lambda} &= L(K+n\lambda_1I_n)^{-1}K\mathbb{1}_n. 
+        (\Psi^*\Psi(\Phi^*\Phi+n\lambda_1I)^{-1}\Phi^*\Phi\Psi^*\Psi+n\lambda_2\Psi^*\Psi)\widehat{\Lambda} &= \Psi^*\Psi(\Phi^*\Phi+n\lambda_1I)^{-1}\Phi^*\Phi\mathds{1}_n \\ 
+        (L(K+n\lambda_1I_n)^{-1}KL+n\lambda_2L)\widehat{\Lambda} &= L(K+n\lambda_1I_n)^{-1}K\mathds{1}_n. 
     \end{align*}
     If $L(K+n\lambda_1I_n)^{-1}KL+n\lambda_2L$ is invertible, this gives the kernel embedded coefficient
     \begin{equation*}
-        \widehat{\Lambda} = (L(K+n\lambda_1I_n)^{-1}KL+n\lambda_2L)^{-1}L(K+n\lambda_1I_n)^{-1}K\mathbb{1}_n. 
+        \widehat{\Lambda} = (L(K+n\lambda_1I_n)^{-1}KL+n\lambda_2L)^{-1}L(K+n\lambda_1I_n)^{-1}K\mathds{1}_n. 
     \end{equation*}
 
     For $\widehat{\Gamma}$, we use the empirical version of (\ref{eq: est_regularizeddual}). 
     \begin{align*}
-        \widehat{u}^* = \Phi\widehat{\Gamma} &= (\frac{1}{n}\Phi\Phi^*+\lambda_1I)^{-1}(\frac{1}{n}\Phi\Psi^*\widehat{q}_a^*-\frac{1}{n}\Phi\mathbb{1}_n) \\
-                                             &= (\Phi\Phi^*+n\lambda_1I)^{-1}(\Phi\Psi^*\Psi\widehat{\Lambda}-\Phi\mathbb{1}_n) \\
-                                             &= \Phi(\Phi^*\Phi+n\lambda_1I)^{-1}(\Psi^*\Psi\widehat{\Lambda}-\mathbb{1}_n) \\
-                                             &= \Phi(K+n\lambda_1I)^{-1}(L\widehat{\Lambda}-\mathbb{1}_n),
+        \widehat{u}^* = \Phi\widehat{\Gamma} &= (\frac{1}{n}\Phi\Phi^*+\lambda_1I)^{-1}(\frac{1}{n}\Phi\Psi^*\widehat{q}_a^*-\frac{1}{n}\Phi\mathds{1}_n) \\
+                                             &= (\Phi\Phi^*+n\lambda_1I)^{-1}(\Phi\Psi^*\Psi\widehat{\Lambda}-\Phi\mathds{1}_n) \\
+                                             &= \Phi(\Phi^*\Phi+n\lambda_1I)^{-1}(\Psi^*\Psi\widehat{\Lambda}-\mathds{1}_n) \\
+                                             &= \Phi(K+n\lambda_1I)^{-1}(L\widehat{\Lambda}-\mathds{1}_n),
     \end{align*}
-    which indicates that $\widehat{\Gamma}=(K+n\lambda_1I)^{-1}(L\widehat{\Lambda}-\mathbb{1}_n)$ by the injection of $\Phi$.
+    which indicates that $\widehat{\Gamma}=(K+n\lambda_1I)^{-1}(L\widehat{\Lambda}-\mathds{1}_n)$ by the injection of $\Phi$.
 \end{proof}
 
 Since $L(K+n\lambda_1I_n)^{-1}KL+n\lambda_2L$ is not guaranteed to be invertible or well-posed by the Gram matrix $L$, 
@@ -394,7 +395,7 @@ we can use the Tikhonov regularized solution instead, which is given by
     \label{eq: est_regularizedlambda}
     \widehat{\Lambda}_{\lambda} := (C^*C+\lambda I)^{-1}C^*b,
 \end{equation}
-where $C:=L(K+n\lambda_1I_n)^{-1}KL+n\lambda_2L$, $b:=L(K+n\lambda_1I_n)^{-1}K\mathbb{1}_n$. 
+where $C:=L(K+n\lambda_1I_n)^{-1}KL+n\lambda_2L$, $b:=L(K+n\lambda_1I_n)^{-1}K\mathds{1}_n$. 
 (\ref{eq: est_regularizedlambda}) converges to the minimum-norm solution as $\lambda\rightarrow 0$. 
 
 Of note, since $q_a\in\tilde{F}\bigcap F$, the coefficients of the linear expansion of $q_a$ with respect to the feature maps 
@@ -417,45 +418,45 @@ and write the derivation with the simplest description.
 \begin{align*}
     E[Y|Z,A=a,X] &= E[h_a(W,a,X)|Z,X] \\
     f(a|Z,X)E[Y|Z,A=a,X] &= f(a|Z,X)E[h_a(W,a,X)|Z,X] \\
-    E[\mathbb{1}_{A=a}Y|Z,X] &= E[\mathbb{1}_{A=a}h_a(W,a,X)|Z,X].
+    E[\mathds{1}_{A=a}Y|Z,X] &= E[\mathds{1}_{A=a}h_a(W,a,X)|Z,X].
 \end{align*}
 
 \textbf{Part ii) ERM reformulation, minimax problem reformulation:}
 \begin{align*}
-     &\min_{h_a\in L_2(P_{(W,X|Z,X)})}E[l(E[\mathbb{1}_{A=a}Y|Z,X], E[\mathbb{1}_{A=a}h_a(W,a,X)|Z,X])] \\
-    =&\min_{h_a\in L_2(P_{(W,X|Z,X)})}E[\max_{u\in\mathbb{R}}\{uE[\mathbb{1}_{A=a}h_a(W,a,X)|Z,X]-uE[\mathbb{1}_{A=a}Y|Z,X]-\frac{u^2}{2}\}] \\
-    =&\min_{h_a\in L_2(P_{(W,X|Z,X)})}\max_{u\in\mathcal{M}(Z,X)}E[u(Z,X)E[\mathbb{1}_{A=a}h_a(W,a,X)|Z,X]-u(Z,X)E[\mathbb{1}_{A=a}Y|Z,X]-\frac{1}{2}u^2(Z,X)] \\
-    =&\min_{h_a\in L_2(P_{(W,X|Z,X)})}\max_{u\in\mathcal{M}(Z,X)}E[u(Z,X)\mathbb{1}_{A=a}h_a(W,a,X)-u(Z,X)\mathbb{1}_{A=a}Y-\frac{1}{2}u^2(Z,X)] \\
-    =&\min_{h_a\in \mathcal{C}_0(W,X)}\max_{u\in\mathcal{C}_0(Z,X)}E[u(Z,X)\mathbb{1}_{A=a}h_a(W,a,X)-u(Z,X)\mathbb{1}_{A=a}Y-\frac{1}{2}u^2(Z,X)].
+     &\min_{h_a\in L_2(P_{(W,X|Z,X)})}E[l(E[\mathds{1}_{A=a}Y|Z,X], E[\mathds{1}_{A=a}h_a(W,a,X)|Z,X])] \\
+    =&\min_{h_a\in L_2(P_{(W,X|Z,X)})}E[\max_{u\in\mathbb{R}}\{uE[\mathds{1}_{A=a}h_a(W,a,X)|Z,X]-uE[\mathds{1}_{A=a}Y|Z,X]-\frac{u^2}{2}\}] \\
+    =&\min_{h_a\in L_2(P_{(W,X|Z,X)})}\max_{u\in\mathcal{M}(Z,X)}E[u(Z,X)E[\mathds{1}_{A=a}h_a(W,a,X)|Z,X]-u(Z,X)E[\mathds{1}_{A=a}Y|Z,X]-\frac{1}{2}u^2(Z,X)] \\
+    =&\min_{h_a\in L_2(P_{(W,X|Z,X)})}\max_{u\in\mathcal{M}(Z,X)}E[u(Z,X)\mathds{1}_{A=a}h_a(W,a,X)-u(Z,X)\mathds{1}_{A=a}Y-\frac{1}{2}u^2(Z,X)] \\
+    =&\min_{h_a\in \mathcal{C}_0(W,X)}\max_{u\in\mathcal{C}_0(Z,X)}E[u(Z,X)\mathds{1}_{A=a}h_a(W,a,X)-u(Z,X)\mathds{1}_{A=a}Y-\frac{1}{2}u^2(Z,X)].
 \end{align*}
 
 \textbf{Part iii) Kernel embedding of means and cross-covariances:}
 \begin{align*}
-     &\min_{h_a\in F}\max_{u\in H}E[u(Z,X)\mathbb{1}_{A=a}h_a(W,a,X)-u(Z,X)\mathbb{1}_{A=a}Y-\frac{1}{2}u^2(Z,X)] \\
-    =&\min_{h_a\in F}\max_{u\in H}E[\langle u,\phi(Z,X)\rangle_H\mathbb{1}_{A=a}\langle h_a,\tilde{\psi(W,X)}\rangle_{\tilde{F}}-\langle u,\phi(Z,X)\rangle_H\mathbb{1}_{A=a}Y-\frac{1}{2}\langle C_{(ZX)}u,u\rangle_H] \\
-    =&\min_{h_a\in F}\max_{u\in H}E[\langle u,\phi(Z,X)\rangle_H\langle h_a,\psi(W,A,X)\rangle_F-\langle u,\mathbb{1}_{A=a}Y\phi(Z,X)\rangle_H - \frac{1}{2}\langle C_{(ZX)}u,u\rangle_H] \\
-    =&\min_{h_a\in F}\max_{u\in H}E[\langle u\otimes h_a, \phi(Z,X)\otimes\psi(W,A,X)\rangle_{HS(F,H)}-\langle u,\mathbb{1}_{A=a}Y\phi(Z,X)\rangle_H-\frac{1}{2}\langle C_{(ZX)}u,u\rangle_H] \\
-    =&\min_{h_a\in F}\max_{u\in H}\langle u\otimes h_a, C_{(WAX)(ZX)}\rangle_{HS(F,H)}-\langle u,E[\mathbb{1}_{A=a}Y\phi(Z,X)]+\frac{1}{2}C_{(ZX)}u\rangle_H \\
-    =&\min_{h_a\in F}\max_{u\in H}\langle u,C_{(WAX)(ZX)}h_a-E[\mathbb{1}_{A=a}Y\phi(Z,X)]-\frac{1}{2}C_{(ZX)}u\rangle_H.
+     &\min_{h_a\in G}\max_{u\in D}E[u(Z,X)\mathds{1}_{A=a}h_a(W,a,X)-u(Z,X)\mathds{1}_{A=a}Y-\frac{1}{2}u^2(Z,X)] \\
+    =&\min_{h_a\in G}\max_{u\in D}E[\langle u,\rho(Z,X)\rangle_D\mathds{1}_{A=a}\langle h_a,\tilde{\pi}(W,X)\rangle_{\tilde{G}}-\langle u,\rho(Z,X)\rangle_D\mathds{1}_{A=a}Y-\frac{1}{2}\langle C_{(ZX)}u,u\rangle_D] \\
+    =&\min_{h_a\in G}\max_{u\in D}E[\langle u,\rho(Z,X)\rangle_D\langle h_a,\pi(W,A,X)\rangle_G-\langle u,\mathds{1}_{A=a}Y\rho(Z,X)\rangle_D - \frac{1}{2}\langle C_{(ZX)}u,u\rangle_D] \\
+    =&\min_{h_a\in G}\max_{u\in D}E[\langle u\otimes h_a, \rho(Z,X)\otimes\pi(W,A,X)\rangle_{HS(G,D)}-\langle u,\mathds{1}_{A=a}Y\rho(Z,X)\rangle_D-\frac{1}{2}\langle C_{(ZX)}u,u\rangle_D] \\
+    =&\min_{h_a\in G}\max_{u\in D}\langle u\otimes h_a, C_{(WAX)(ZX)}\rangle_{HS(G,D)}-\langle u,E[\mathds{1}_{A=a}Y\rho(Z,X)]+\frac{1}{2}C_{(ZX)}u\rangle_D \\
+    =&\min_{h_a\in G}\max_{u\in D}\langle u,C_{(WAX)(ZX)}h_a-E[\mathds{1}_{A=a}Y\rho(Z,X)]-\frac{1}{2}C_{(ZX)}u\rangle_D.
 \end{align*}
 
 \textbf{Part iv) Tikhonov regularized solutions:}
 \begin{align*}
-    &\min_{h_a\in F}\max_{u\in H}\langle u,C_{(WAX)(ZX)}h_a-E[\mathbb{1}_{A=a}Y\phi(Z,X)]-\frac{1}{2}C_{(ZX)}u\rangle_H +\frac{\lambda_2}{2}\langle h_a,h_a\rangle_F - \frac{\lambda_1}{2}\langle u,u\rangle_H. \\
+    &\min_{h_a\in G}\max_{u\in D}\langle u,C_{(WAX)(ZX)}h_a-E[\mathds{1}_{A=a}Y\rho(Z,X)]-\frac{1}{2}C_{(ZX)}u\rangle_D +\frac{\lambda_2}{2}\langle h_a,h_a\rangle_G - \frac{\lambda_1}{2}\langle u,u\rangle_D. \\
     &\left\{\begin{aligned}
-        u^* &= (C_{(ZX)}+\lambda_1I)^{-1}(C_{(WAX)(ZX)}h_a-E[\mathbb{1}_{A=a}Y\phi(Z,X)]), \\
-        h_a^* &= (C_{(ZX)(WAX)}(C_{(ZX)}+\lambda_1I)^{-1}C_{(WAX)(ZX)}+\lambda_2I)^{-1}C_{(ZX)(WAX)}(C_{(ZX)}+\lambda_1I)^{-1}E[\mathbb{1}_{A=a}Y\phi(Z,X)].
+        u^* &= (C_{(ZX)}+\lambda_1I)^{-1}(C_{(WAX)(ZX)}h_a-E[\mathds{1}_{A=a}Y\rho(Z,X)]), \\
+        h_a^* &= (C_{(ZX)(WAX)}(C_{(ZX)}+\lambda_1I)^{-1}C_{(WAX)(ZX)}+\lambda_2I)^{-1}C_{(ZX)(WAX)}(C_{(ZX)}+\lambda_1I)^{-1}E[\mathds{1}_{A=a}Y\rho(Z,X)].
     \end{aligned}\right.
 \end{align*}
 
 \textbf{Part v) Empirical forms:}
 \begin{align*}
-    &\widehat{h}_a^* = \Psi\widehat{\Lambda} = \Psi(L(K+n\lambda_1I)^{-1}KL+n\lambda_2L)^{-1}L(K+n\lambda_1I)^{-1}K(\mathbb{1}_{A=a}Y), \\
-    &\widehat{u}^* = \Phi\widehat{\Gamma} = \Phi(K+n\lambda_1I)^{-1}(L\widehat{\Lambda}-\mathbb{1}_{A=a}Y), 
+    &\widehat{h}_a^* = \Pi\widehat{\Lambda} = \Pi(L(K+n\lambda_1I)^{-1}KL+n\lambda_2L)^{-1}L(K+n\lambda_1I)^{-1}K(\mathds{1}_{A=a}Y), \\
+    &\widehat{u}^* = \rho\widehat{\Gamma} = \rho(K+n\lambda_1I)^{-1}(L\widehat{\Lambda}-\mathds{1}_{A=a}Y), 
 \end{align*}
-where $\Phi=(\phi(z_1,x_1),\cdots,\phi(z_n,x_n))$, $\Psi=(\mathbb{1}_{a_1=a}\tilde{\psi}(w_1,x_1),\cdots,\mathbb{1}_{a_n=a}\tilde{\psi}(w_n,x_n))=(\psi(w_1,a_1,x_1),\cdots,\psi(w_n,a_n,x_n))$, $K=\Phi^*\Phi$, $L=\Psi^*\Psi$.
+where $\rho=(\rho(z_1,x_1),\cdots,\rho(z_n,x_n))$, $\Pi=(\mathds{1}_{a_1=a}\tilde{\pi}(w_1,x_1),\cdots,\mathds{1}_{a_n=a}\tilde{\pi}(w_n,x_n))=(\pi(w_1,a_1,x_1),\cdots,\pi(w_n,a_n,x_n))$, $K=\rho^*\rho$, $L=\Pi^*\Pi$.
 
-\subsection{Analysis on convergence}
+\subsection{Analysis on convergence of the bridge function estimator}
 
 Since RKHS $F$ is dense in $\mathcal{C}_0(Z,X)$, 
 under Assumption \ref{ass: est_contqbridge}, 
@@ -488,8 +489,8 @@ we derive the decay rate of $\|q_a^*-q_a^{\dagger}\|_F$ and $\|\widehat{q}_a^*-P
     for all $g\in H$, we have 
     \begin{align}
         \label{eq: est_kernelembedformnewintgral}
-        E_{W,X,A,Z}[\mathbb{1}_{A=a}q_a(Z,a,X)g(W,X)] &= E_{W,X}E_{A,Z}[\mathbb{1}_{A=a}q_a(Z,a,X)g(W,X)|W,X] \notag \\ 
-                                              &= E_{W,X}[g(W,X)\underbrace{E_{A,Z}[\mathbb{1}_{A=a}q_a(Z,a,X)|W,X]}_{=1\text{ by (\ref{eq: est_newintegral})}}] \notag \\
+        E_{W,X,A,Z}[\mathds{1}_{A=a}q_a(Z,a,X)g(W,X)] &= E_{W,X}E_{A,Z}[\mathds{1}_{A=a}q_a(Z,a,X)g(W,X)|W,X] \notag \\ 
+                                              &= E_{W,X}[g(W,X)\underbrace{E_{A,Z}[\mathds{1}_{A=a}q_a(Z,a,X)|W,X]}_{=1\text{ by (\ref{eq: est_newintegral})}}] \notag \\
                                               &= E_{W,X}[g(W,X)]. 
     \end{align}
     Hence, the bounded continuous solution must be a solution of (\ref{eq: est_kernelembedformnewintgral}) as well. 
@@ -645,7 +646,7 @@ for the next theorem.
         C_{\lambda_1}&=C_{(WX)}+\lambda_1I, & R_{\lambda_1}= C_{(WX)(ZAX)}C_{\lambda_1}^{-1}C_{(ZAX)(WX)}, \\
         \widehat{C}_{\lambda_1}&=\widehat{C}_{(WX)}+\lambda_1I, & \widehat{R}_{\lambda_1}=\widehat{C}_{(WX)(ZAX)}\widehat{C}_{\lambda_1}^{-1}\widehat{C}_{(ZAX)(WX)}.
     \end{align*}
-    We don't introduce new notations of orthogonal projections of (cross-)covariance operators onto $F_n$ for simplicity. 
+    We don't introduce new notations of orthogonal projections of (cross-)covariance and mean embeddings onto $F_n$ for simplicity. 
     Then the expectation of difference of $\widehat{q}_a^*$ and $P_nq_a^*$ in RKHS norm is given by  
     \begin{align*}
         E\|\widehat{q}_a^*-P_nq_a^*\|_{F_n}&\leq E\|\widehat{q}_a^*-P_nq^*_a\|_{F_n} + E\|P_nq^*_a-q^*_a\|_{F_n} \\
@@ -762,4 +763,575 @@ for the next theorem.
     which is irrelevant to the decay rate of $\lambda_2$.
 \end{proof}
 
-\subsection{Doubly robust estimator, consistency and asymptotic normality}
+\begin{corollary}(\textbf{Second moment convergence})
+    
+    \label{cor: est_secondempiricaltokernel}
+    Suppose kernel functions $k(\cdot,\cdot)$ and $l(\cdot,\cdot)$ are bounded and smooth. 
+    Given regularization parameter $\lambda_1$ which is a fixed positive number 
+    and $\lambda_2=n^{-\beta}$ for $\beta>0$, 
+    the second moment of the difference between empirical regularized kernel embedded solution $\widehat{q}_a^*$ 
+    and regularized kernel embedded solution $q_a^*$ in RKHS norm converges to 0 as $n$ goes to $\infty$ with convergence rate 
+    \begin{equation*}
+        E\|\widehat{q}_a^*-q_a^*\|^2_{F_n} \leq\left\{\begin{aligned}
+            & \mathcal{O}(n^{4\beta-1}),\ \text{if }\inf_{\lambda}\{\lambda\in\sigma(\widehat{R}_{\lambda_1})\} = \inf_{\lambda}\{\lambda\in\sigma(R_{\lambda_1})\} = 0, \\
+            & \mathcal{O}(n^{-1}),\ \text{if }\inf_{\lambda}\{\lambda\in\sigma(\widehat{R}_{\lambda_1})\}>0 \text{ and } \inf_{\lambda}\{\lambda\in\sigma(R_{\lambda_1})\} > 0.
+        \end{aligned}\right.
+    \end{equation*}
+\end{corollary}
+\begin{proof}
+    We continue to use the notations in the proof of Theorem \ref{thm: est_empiricaltokernel},  
+    and consider only the convergence rate of $E\|\widehat{q}^*_a-P_nq^*_a\|^2_{F_n}$. 
+    Then, by H\"{o}lder's inequality, the second moment of the difference in RKHS norm can be upper bounded by 
+    \begin{equation}
+        \label{eq: est_secondconvergencerate}
+        E\|\widehat{q}_a^*-P_nq_a^*\|^2_{F_n} \leq E[T_1^2] + E[T_2^2] + E[T_1T_2] \leq E[T_1^2] + E[T_2^2] + \sqrt{E[T_1^2]E[T_2^2]}. 
+    \end{equation}
+    where 
+    \begin{align*}
+        T_1&:=\|(\widehat{R}_{\lambda_1}+\lambda_2I)^{-1}\widehat{C}_{(WX)(ZAX)}\widehat{C}^{-1}_{\lambda_1}\widehat{\mu}_{(WX)}-(R_{\lambda_1}+\lambda_2I)^{-1}\widehat{C}_{(WX)(ZAX)}\widehat{C}^{-1}_{\lambda_1}\widehat{\mu}_{(WX)}\|_{F_n} \\
+        T_2&:=\|(R_{\lambda_1}+\lambda_2I)^{-1}\widehat{C}_{(WX)(ZAX)}\widehat{C}^{-1}_{\lambda_1}\widehat{\mu}_{(WX)}-(R_{\lambda_1}+\lambda_2I)^{-1}C_{(WX)(ZAX)}C^{-1}_{\lambda_1}\mu_{(WX)}\|_{F_n}.  
+    \end{align*}
+    By (\ref{eq: est_consistency1}), combined with the upper bounds of operator norms and empirical embedding norms, 
+    $E[T_1^2]$ can be upper bounded by 
+    \begin{align*}
+        E[T_1^2] \leq& E\bigg[\|\widehat{C}_{(WX)(ZAX)}\|^2_{\mathcal{L}(H_n,F_n)}\|\widehat{\mu}_{(WX)}\|^2_{F_n} \|\widehat{C}^{-1}_{\lambda_1}\|^2_{\mathcal{L}(H_n)}\|(\widehat{R}_{\lambda_1}+\lambda_2I)^{-1}\|^2_{\mathcal{L}(F_n)} \\
+                     &\phantom{\|\widehat{C}_{(WX)(ZAX)}\|^2_{\mathcal{L}(H_n)}} \cdot \|(R_{\lambda_1}+\lambda_2I)^{-1}\|^2_{\mathcal{L}(F_n)} \|R_{\lambda_1}-\widehat{R}_{\lambda_1}\|^2_{\mathcal{L}(F_n)}\bigg] \\
+                 \leq& \frac{t^4_{\phi}t^2_{\psi}}{\lambda^2_1(\delta'+\lambda_2)^2(\delta+\lambda_2)^2}E\|R_{\lambda_1}-\widehat{R}_{\lambda_1}\|^2_{\mathcal{L}(F_n)}.  
+    \end{align*}
+    By (\ref{eq: est_consistency5}) and $\sqrt{n}$-consistency of (cross-)covariance embeddings, 
+    $E\|R_{\lambda_1}-\widehat{R}_{\lambda_1}\|^2_{\mathcal{L}(F_n)}$ has an upper bound 
+    \begin{align*}
+        E\|R_{\lambda_1}-\widehat{R}_{\lambda_1}\|^2_{\mathcal{L}(F_n)} &\leq E\bigg[\bigg(\frac{t_{\phi}t_{\psi}}{\lambda_1}\|\widehat{C}_{(ZAX)(WX)}-C_{(ZAX)(WX)}\|_{HS(F_n,H_n)} + \frac{t_{\phi}t_{\psi}}{\lambda_1}\|\widehat{C}_{(WX)(ZAX)}-C_{(WX)(ZAX)}\|_{HS(H_n,F_n)} \notag\\
+                                                                      &\phantom{\leq}+ \frac{t^2_{\phi}t^2_{\psi}}{\lambda^2_1}\|\widehat{C}_{WX}-C_{WX}\|_{HS(H_n)}\bigg)^2\bigg],  
+    \end{align*}
+    which has a convergence rate of $\mathcal{O}(\frac{1}{n})$ after expanded by H\"{o}lder's inequality. 
+    Hence, we have that the convergence rate of $E[T_1^2]$ is $\mathcal{O}(\frac{1}{\lambda^4_2n})$. 
+
+    By (\ref{eq: est_consistency6}), $\sqrt{n}$-consistency of mean and (cross-)covariance embeddings,  
+    we have the upper bound of $E[T_2^2]$, which is given by 
+    \begin{align*}
+        E[T_2^2] &\leq E\bigg[\bigg(\frac{t_{\phi}}{\lambda_1(\delta+\lambda_2)} \|\widehat{C}_{(WX)(ZAX)}-C_{(WX)(ZAX)}\|_{HS(H_n,F_n)} + \frac{t^2_{\phi}t_{\psi}}{\lambda^2_1(\delta+\lambda_2)}\|(\widehat{C}_{(WX)}-C_{(WX)})\|_{HS(H_n,F_n)} \\
+                 & \phantom{text}+ \frac{t_{\phi}t_{\psi}}{\lambda_1(\delta+\lambda_2)}\|\widehat{\mu}_{(WX)}-\mu_{(WX)}\|_{F_n}\bigg)^2\bigg] \\
+                 &=\mathcal{O}(\frac{1}{(\delta+\lambda_2)^2n}). 
+    \end{align*}
+
+    combining the convergence rates of $E[T_1^2]$ and $E[T_2^2]$, by (\ref{eq: est_secondconvergencerate}), 
+    we have that the second moment of the difference in RKHS norm has a convergence rate of 
+    \begin{equation}
+        \label{eq: est_empiricaltokernelratesquare}
+        \mathcal{O}(\frac{1}{(\delta'+\lambda_2)^2(\delta+\lambda_2)^2n}+\frac{1}{(\delta+\lambda_2)^2n}+\frac{1}{(\delta'+\lambda_2)(\delta+\lambda_2)^2n}). 
+    \end{equation}
+    If $\inf_{\lambda}\{\lambda\in\sigma(\widehat{R}_{\lambda_1})\} = \inf_{\lambda}\{\lambda\in\sigma(R_{\lambda_1})\} = 0$, i.e. $\delta'=\delta=0$, 
+    (\ref{eq: est_empiricaltokernelratesquare}) is just $\mathcal{O}(\frac{1}{\lambda_2^4n})=\mathcal{O}(n^{4\beta-1})$.
+    When $\beta<\frac{1}{4}$, the second moment of the difference in RKHS norm converges to 0 as $n$ goes to $\infty$. 
+
+    If $\inf_{\lambda}\{\lambda\in\sigma(\widehat{R}_{\lambda_1})\}>0 \text{ and } \inf_{\lambda}\{\lambda\in\sigma(R_{\lambda_1})\} > 0$, i.e. $\delta'>0. \delta>0$, 
+    (\ref{eq: est_empiricaltokernelratesquare}) is upper bounded by $\mathcal{O}_p(\frac{1}{\delta'^2\delta^2n}+\frac{1}{\delta^2n}+\frac{1}{\delta'\delta^2n})=\mathcal{O}_p(n^{-1})$.
+\end{proof}
+
+\subsection{Kernel embedded doubly robust estimator, consistency and asymptotic normality}
+
+The kernel embedded ATE estimator built on doubly robust standardization formula (\ref{eq: est_PDR}) is given by 
+\begin{align}
+    \label{eq: est_ATEestimator}
+    \widehat{\chi} &= \frac{1}{n}\sum_{i=1}^{n}[\mathds{1}_{a_i=1}\widehat{q}^*_1(z_i,1,x_i)[y_i-\widehat{h}^*_1(w_i,1,x_i)]-\mathds{1}_{a_i=0}\widehat{q}^*_0(z_i,0,x_i)[y_i-\widehat{h}^*_0(w_i,0,x_i)]]+\widehat{h}^*_1(w_i,1,x_i)-\widehat{h}^*_0(w_i,0,x_i) \\
+                   &= \frac{1}{n}\sum_{i=1}^{n}\left\{\mathds{1}_{a_i=1}\widehat{q}^*_1(z_i,1,x_i)[y_i-\widehat{h}^*_1(w_i,1,x_i)]+\widehat{h}^*_1(w_i,1,x_i)\right\} - \frac{1}{n}\sum_{i=1}^{n}\left\{\mathds{1}_{a_i=0}\widehat{q}^*_0(z_i,0,x_i)[y_i-\widehat{h}^*_0(w_i,0,x_i)]+\widehat{h}^*_0(w_i,0,x_i)\right\} \notag\\
+                   &= \widehat{E}[Y^1] - \widehat{E}[Y^0]. \notag
+\end{align}
+
+We claim that under some regularization conditions, 
+our kernel embedded ATE estimator is consistent to the true $ATE$ and asymptotically normal 
+when sample size $n\rightarrow\infty$.
+
+\subsubsection{Consistency}
+
+\begin{theorem}(\textbf{Consistency of the kernel embedded ATE estimator})
+    
+    \label{thm: est_consistencyATE}
+    Assume the following conditions are true: 
+    \begin{enumerate}
+        \item $\operatorname{Var}(\mathds{1}_{A=a}q_a^{\dagger}(Z,a,X)(Y-h_a^{\dagger}(W,a,X))+h_a^{\dagger}(W,a,X))<\infty$; 
+        \item $E_{ZAX}[(E_Y[|Y||Z,A,X])^2] < \infty$;
+        \item Kernel functions are bounded and smooth. Specifically, $\|\psi(\cdot)\|_F\leq t_{\psi}$, $\|\pi(\cdot)\|_G\leq t_{\pi}$ and $\|h_a^{\dagger}\|_G\leq t_h$. 
+        \item The dataset used to estimate the ATE is independent of the dataset constructing the bridge function estimators. 
+    \end{enumerate}
+    Suppose regularizer $\lambda_2=n^{-\beta}$, $\beta>0$, with spectra of $\widehat{R}_{\lambda_1}$ and $R_{\lambda_1}$ bounded away from 0 from below.
+    Then if the assumption \ref{ass: est_contqbridge} holds, 
+    under the distribution family satisfying the assumption \ref{ass: pre_outcomehold} and \ref{ass: pre_treatmenthold}, 
+    the kernel embedded doubly robust ATE estimator (\ref{eq: est_ATEestimator}) is a consistent estimator of the true ATE given by doubly robust standardization formula (\ref{eq: est_PDR}), i.e. 
+    \begin{equation*}
+        \lim_{n\longrightarrow\infty}E|\widehat{\chi}-\chi| = 0.
+    \end{equation*}
+    The rate of convergence is at most $\left\{\begin{aligned}
+        & \mathcal{O}_p(n^{-\beta}), 0<\beta<\frac{1}{2}, \\
+        & \mathcal{O}_p(n^{-\frac{1}{2}}), \beta\geq\frac{1}{2}.
+    \end{aligned}\right.$
+\end{theorem}
+\begin{proof}
+    Define 
+    \begin{align*}
+        \chi^{\dagger} &= E[\mathds{1}_{A=1}q_1^{\dagger}(Z,1,X)[Y-h_1^{\dagger}(W,1,X)] - \mathds{1}_{A=0}q_0^{\dagger}(Z,0,X)[Y-h_0^{\dagger}(W,0,X)] + h_1^{\dagger}(W, 1, X)-h_0^{\dagger}(W,0,X)] \\
+                       &= E^{\dagger}[Y^1] - E^{\dagger}[Y^0].
+    \end{align*}
+    We first show $\lim_{n\rightarrow\infty}E|\widehat{\chi}-\chi^{\dagger}|=0$ by proving $\lim_{n\rightarrow\infty}E|\widehat{E}[Y^a]-E^{\dagger}[Y^a]|=0$. 
+    Then state that the definition of universal kernel guarantees $\chi^{\dagger}$ to approximate $\chi$ arbitrarily well. 
+    In the proof we will use the triangle inequality, Cauchy-Schwartz inequality, 
+    H\"{o}lder's inequality, Jensen's inequality and the reproducing property for reproducing kernel functions without mentioning. 
+
+    \begin{align*}
+            &E\bigg|\frac{1}{n}\sum_{i=1}^{n}\left\{\mathds{1}_{a_i=a}\widehat{q}^*_a(z_i,a,x_i)(y_i-\widehat{h}_a(w_i,a,x_i))+\widehat{h}_a(w_i,a,x_i)\right\} - E\left[\mathds{1}_{A=a}q_a^{\dagger}(Z,a,X)(Y-h_a^{\dagger}(W,a,X))+h_a^{\dagger}(W,a,X)\right]\bigg| \\
+        \leq&E\bigg|\frac{1}{n}\sum_{i=1}^{n}\left\{\mathds{1}_{a_i=a}\widehat{q}^*_a(z_i,a,x_i)(y_i-\widehat{h}_a(w_i,a,x_i))+\widehat{h}_a(w_i,a,x_i)\right\} - \frac{1}{n}\sum_{i=1}^{n}\left\{\mathds{1}_{a_i=a}q_a^{\dagger}(z_i,a,x_i)(y_i-h_a^{\dagger}(w_i,a,x_i))+h_a^{\dagger}(w_i,a,x_i)\right\}\bigg| \\
+        \phantom{\leq}&+E\bigg|\frac{1}{n}\sum_{i=1}^{n}\left\{\mathds{1}_{a_i=a}q_a^{\dagger}(z_i,a,x_i)(y_i-h_a^{\dagger}(w_i,a,x_i))+h_a^{\dagger}(w_i,a,x_i)\right\} - E\left[\mathds{1}_{A=a}q_a^{\dagger}(Z,a,X)(Y-h_a^{\dagger}(W,a,X))+h_a^{\dagger}(W,a,X)\right]\bigg| \\
+        :=&l_1+l_2
+    \end{align*}
+
+    \textbf{Part i) Bounding $l_1$:}
+
+    \begin{align*}
+        &E\bigg|\frac{1}{n}\sum_{i=1}^{n}\left\{\mathds{1}_{a_i=a}\widehat{q}^*_a(z_i,a,x_i)(y_i-\widehat{h}_a(w_i,a,x_i))+\widehat{h}_a(w_i,a,x_i)\right\} - \frac{1}{n}\sum_{i=1}^{n}\left\{\mathds{1}_{a_i=a}q_a^{\dagger}(z_i,a,x_i)(y_i-h_a^{\dagger}(w_i,a,x_i))+h_a^{\dagger}(w_i,a,x_i)\right\}\bigg| \\
+        \leq&\frac{1}{n}\sum_{i=1}^{n}E\bigg|\mathds{1}_{a_i=a}\widehat{q}^*_a(z_i,a,x_i)(y_i-\widehat{h}_a(w_i,a,x_i))+\widehat{h}_a(w_i,a,x_i)-\mathds{1}_{a_i=a}q_a^{\dagger}(z_i,a,x_i)(y_i-h_a^{\dagger}(w_i,a,x_i))-h_a^{\dagger}(w_i,a,x_i)\bigg| \\
+        =&E\bigg|\mathds{1}_{A=a}\widehat{q}^*_a(Z,a,X)[Y-\widehat{h}_a(W,a,X)]+\widehat{h}_a(W,a,X)-\mathds{1}_{A=a}q_a^{\dagger}(Z,a,X)(Y-h_a^{\dagger}(W,a,X))-h_a^{\dagger}(W,a,X)\bigg| \\
+        \leq&E\bigg|\mathds{1}_{A=a}Y(\widehat{q}^*_a(Z,a,X)-q_a^{\dagger}(Z,a,X))\bigg| + E\bigg|\widehat{h}_a(W,a,X)-h_a^{\dagger}(W,a,X)\bigg| \\
+        &\phantom{\bigg|\mathds{1}_{A=a}Y(\widehat{q}^*_a(Z,a,X)-q_a^{\dagger}(Z,a,X))\bigg|} + E\bigg|\mathds{1}_{A=a}\widehat{q}^*_a(Z,a,X)\widehat{h}_a(W,a,X)-\mathds{1}_{A=a}q_a^{\dagger}(Z,a,X)h_a^{\dagger}(W,a,X)\bigg| \\
+        &:= l_{11}+l_{12}+l_{13}.
+    \end{align*}
+
+    For $l_{11}$, 
+    \begin{align}
+        \label{eq: est_l11bound}
+        l_{11}:&= E\bigg|\mathds{1}_{A=a}Y(\widehat{q}^*_a(Z,a,X)-q_a^{\dagger}(Z,a,X))\bigg| \notag\\
+               &= E_{ZAX}[|\mathds{1}_{A=a}(\widehat{q}^*_a(Z,a,X)-q_a^{\dagger}(Z,a,X))|E[|Y||Z,A,X]] \notag\\
+               &= E_{ZAX}[\left\langle \widehat{q}^*_a-q_a^{\dagger}, \psi(Z,A,X)\right\rangle_FE[|Y||Z,A,X]] \notag\\
+               &\leq E_{ZAX}[\|\widehat{q}^*_a-q_a^{\dagger}\|_F\|\psi(Z,A,X)\|_FE[|Y||Z,A,X]] \notag\\
+               &\leq (E\|\widehat{q}^*_a-q_a^{\dagger}\|_F^2)^{\frac{1}{2}}(E_{ZAX}[(E[|Y||Z,A,X])^2])^{\frac{1}{2}}t_{\psi}.
+    \end{align}
+    To bound (\ref{eq: est_l11bound}), we need the upper bound of $E\|\widehat{q}^*_a-q_a^{\dagger}\|_F^2$. 
+    \begin{align*}
+        E\|\widehat{q}^*_a-q_a^{\dagger}\|_F^2 &= E\|\widehat{q}^*_a-q_a^*+q_a^*-q_a^{\dagger}\|_F^2 \\
+                                               &= E\|\widehat{q}^*_a-q_a^*\|_F^2 + E\|q_a^*-q_a^{\dagger}\|_F^2 + 2E\left[\left\langle \widehat{q}^*_a-q_a^*, q_a^*-q_a^{\dagger}\right\rangle _F\right] \\
+                                               &\leq E\|\widehat{q}^*_a-q_a^*\|_F^2 + E\|q_a^*-q_a^{\dagger}\|_F^2 + 2E\left[\|\widehat{q}^*_a-q_a^*\|_F\|q_a^*-q_a^{\dagger}\|_F\right] \\
+                                               &\leq E\|\widehat{q}^*_a-q_a^*\|_F^2 + E\|q_a^*-q_a^{\dagger}\|_F^2 + 2\left(E\|\widehat{q}^*_a-q_a^*\|_F^2\right)^{\frac{1}{2}} \left(E\|q_a^*-q_a^{\dagger}\|_F^2\right)^{\frac{1}{2}}. 
+    \end{align*}
+    By Theorem \ref{thm: est_kernelembeddedtotrue} and Corollary \ref{cor: est_secondempiricaltokernel}, and Remark \ref{rem: est_ratekernelembeddedtotrue}, 
+    the upper bound of the rate of convergence of right hand side is 
+    \begin{equation}
+        \label{eq: est_rate1}
+        \mathcal{O}(n^{-1})+\mathcal{O}(n^{-2\beta})+\mathcal{O}(n^{-\beta-\frac{1}{2}}).
+    \end{equation} 
+    With the same inequality technique, the analysis of $l_{12}$ produces the rate of convergence that is exactly the same as (\ref{eq: est_rate1}). 
+    Then, for both $l_{11}$ and $l_{12}$,  
+    the asymptotic convergence happens when $\left\{\begin{aligned}
+        &-2\beta<0, \\
+        &-\beta-\frac{1}{2}<0
+    \end{aligned}\right.$, 
+    with an intersection $\beta>0$. 
+    The dominant rate of convergence is given by $\left\{\begin{aligned}
+        & \mathcal{O}(n^{-\beta}), 0<\beta<\frac{1}{2}, \\
+        & \mathcal{O}(n^{-\frac{1}{2}}), \beta\geq \frac{1}{2}.
+    \end{aligned}\right.$
+
+    For $l_{13}$, 
+    \begin{align}
+        \label{eq: est_l13bound1}
+        l_{13}:&= E\bigg|\mathds{1}_{A=a}\widehat{q}^*_a(Z,a,X)\widehat{h}_a(W,a,X)-\mathds{1}_{A=a}q_a^{\dagger}(Z,a,X)h_a^{\dagger}(W,a,X)\bigg| \notag\\
+               &\leq E\bigg|\mathds{1}_{A=a}\widehat{q}^*_a(Z,a,X)(\widehat{h}_a(W,a,X)-h_a^{\dagger}(W,a,X))\bigg| + E\bigg|\mathds{1}_{A=a}(\widehat{q}^*_a(Z,a,X)-q_a^{\dagger}(Z,a,X))h_a^{\dagger}(W,a,X)\bigg|.
+    \end{align}
+    We only derive the upper bound of the rate of convergence of the second term on the right hand side, 
+    since the two terms share the same structure. 
+    \begin{align*}
+        E\bigg|\mathds{1}_{A=a}(\widehat{q}^*_a(Z,a,X)-q_a^{\dagger}(Z,a,X))h_a^{\dagger}(W,A,X)\bigg| &= E\bigg|\left\langle h_a^{\dagger}, \pi(W,a,X)\right\rangle_G\left\langle \widehat{q}^*_a-q_a^{\dagger}, \psi(Z,A,X)\right\rangle_F\bigg| \\
+                &\leq E[\|h_a^{\dagger}\|_G\|\pi(W,A,X)\|_G\|\widehat{q}^*_a-q_a^{\dagger}\|_F\|\psi(Z,A,X)\|_F] \\
+                &\leq t_ht_{\pi}t_{\psi}E\|\widehat{q}^*_a-q_a^{\dagger}\|_F \\
+                &\leq t_ht_{\pi}t_{\psi}(E\|\widehat{q}^*_a-q^*_a\|_F+E\|q^*_a-q_a^{\dagger}\|_F).
+    \end{align*}
+    By Theorem \ref{thm: est_kernelembeddedtotrue} and \ref{thm: est_empiricaltokernel}, and Remark \ref{rem: est_ratekernelembeddedtotrue}, 
+    the upper bound of rate of convergence of right hand side is 
+    \begin{equation*}
+        \mathcal{O}(n^{-\frac{1}{2}}) + \mathcal{O}(n^{-\beta}). 
+    \end{equation*}
+    The asymptotic convergence happens when $\beta>0$. 
+    The dominant rate of convergence is given by $\left\{\begin{aligned}
+        & \mathcal{O}(n^{-\beta}), 0<\beta<\frac{1}{2}, \\
+        & \mathcal{O}(n^{-\frac{1}{2}}), \beta\geq \frac{1}{2}.
+    \end{aligned}\right.$
+
+    \textbf{Part ii) Bounding $l_2$:}
+    By the assumption of the finite variance of $\mathds{1}_{A=a}q_a^{\dagger}(Z,a,X)(Y-h_a^{\dagger}(W,a,X))+h_a^{\dagger}(W,a,X)$, 
+    $l_2$ can be upper bounded by 
+    \begin{align*}
+        l_2:&=E\bigg|\frac{1}{n}\sum_{i=1}^{n}\left\{\mathds{1}_{a_i=a}q_a^{\dagger}(z_i,a,x_i)(y_i-h_a^{\dagger}(w_i,a,x_i))+h_a^{\dagger}(w_i,a,x_i)\right\} - E\left[\mathds{1}_{A=a}q_a^{\dagger}(Z,a,X)(Y-h_a^{\dagger}(W,a,X))+h_a^{\dagger}(W,a,X)\right]\bigg| \\
+            &\leq \sqrt{\operatorname{Var}\left(\frac{1}{n}\sum_{i=1}^{n}\left\{\mathds{1}_{a_i=a}q_a^{\dagger}(z_i,a,x_i)(y_i-h_a^{\dagger}(w_i,a,x_i))+h_a^{\dagger}(w_i,a,x_i)\right\}\right)} \\
+            &=\frac{1}{\sqrt{n}}\sqrt{\operatorname{Var}\left(\mathds{1}_{A=a}q_a^{\dagger}(Z,a,X)(Y-h_a^{\dagger}(W,a,X))+h_a^{\dagger}(W,a,X)\right)} \\
+            &=\mathcal{O}(n^{-\frac{1}{2}}).
+    \end{align*}
+
+    \textbf{Part iii) Bounding $E|\widehat{\chi}-\chi|$:}
+
+    Since $E|\widehat{\chi}-\chi^{\dagger}|\leq E|\widehat{E}[Y^1]-E^{\dagger}[Y^1]|+E|\widehat{E}[Y^0]-E^{\dagger}[Y^0]|$, 
+    combing the asymptotic behavior of $l_1$ and $l_2$, 
+    we have the rate of convergence of $E|\widehat{\chi}-\chi^{\dagger}|$ by 
+    $\left\{\begin{aligned}
+        & \mathcal{O}(n^{-\beta}), 0<\beta<\frac{1}{2}, \\
+        & \mathcal{O}(n^{-\frac{1}{2}}), \beta\geq \frac{1}{2}.
+    \end{aligned}\right.$
+    By the definition of universal kernel, $\chi^{\dagger}$ should approximate the true ATE $\chi$ arbitrarily well. 
+    Hence, $\widehat{\chi}$ is a consistent estimator of $\chi$.
+\end{proof}
+
+\subsubsection{Asymptotic normality}
+
+We discuss the asymptotic normality of the PDR estimator (\ref{eq: est_ATEestimator}) 
+by the double machine learning (DML) method proposed by Chernozhukov et al. \cite{Chernozhukov2018Double}. 
+Based on the proof using a simplified assumption given by Syrgkanis in \cite{syrgkanis2017proof}, 
+we show that, even though the Neyman orthogonality is satisfied, 
+the PDR estimator built with dual kernel embedding method is asymptotically normal 
+only when $\lambda_1$ is an effective stabilizer and the spectra of $\widehat{R}_{\lambda_1}$ and $R_{\lambda_1}$ 
+are bounded away from 0 from below.
+
+The DML method is proposed to give an asymptotically normal estimator of a parameter lying in a finite dimensional space 
+while a nuisance parameter exists. 
+One of the situations discussed that is applicable with DML is to estimate the parameter $\chi$ from 
+moment condition $E[m(\mathcal{O};\chi,\eta)]=0$, 
+where $m$ is a known function in $L_2(P_{\mathcal{O}})$, $\mathcal{O}$ is all the observed random variables, 
+and $\eta$ is the nuisance parameter. 
+Suppose $\chi_0$ and $\eta_0$ are the true parameters.
+The standard procedure of DML is first to construct a Neyman orthogonal function $m$ satisfying $E[\nabla_{\eta}m(\mathcal{O};\chi_0,\eta_0)(\widehat{\eta}-\eta_0)]=0$, 
+meaning that the function is not sensitive to the first order perturbation of the estimator $\widehat{\eta}$. 
+Then use cross-fitting to split the training data and estimate the nuisance parameter on an auxiliary dataset to make sure the Neyman orthogonality works. 
+If the estimator $\widehat{\eta}$ has a decaying rate of $\mathcal{O}_p(n^{-\frac{1}{4}})$ to $\eta_0$, 
+then the estimator $\widehat{\chi}$ built with $\widehat{\eta}$ and the rest dataset is asymptotically normal with a covariance matrix $\Sigma$, i.e.
+$\sqrt{n}(\widehat{\chi}-\chi_0)\longrightarrow\mathcal{N}(0,\Sigma)$.
+
+As for estimating ATE from PDR estimator, we write the moment condition by 
+\begin{equation}
+    \label{eq: est_moment}
+    E[\mathds{1}_{A=1}q_1(Z,1,X)[Y-h_1(W,1,X)] - \mathds{1}_{A=0}q_0(Z,0,X)[Y-h_0(W,0,X)] + h_1(W, 1, X)-h_0(W,0,X) - \chi] = 0.
+\end{equation}
+It is clear that in the proximal causal inference, 
+the nuisance parameter $\eta$ consists of the four bridge functions $(q_1,q_0,h_1,h_0)$. 
+
+We first introduce the simplified Neyman orthogonality and show that this requirement is satisfied. 
+\begin{definition}(\textbf{Simplified Neyman Orthogonality})
+    
+    \label{def: est_Neyman}
+    The function $m$ is orthogonal at point $(\chi_0, \eta_0)$ if it satisfies 
+    \begin{equation*}
+        E[\nabla_{\eta}m(\mathcal{O};\chi_0,\eta_0)^T(\widehat{\eta}-\eta_0)]=0, 
+    \end{equation*}
+    for any $\widehat{\eta}$ that is an estimator of $\eta$ built from some machine learning method.
+\end{definition}
+As the Neyman orthogonality is unnecessary to discuss in our case, 
+we suggest readers to check Definition 2.1 in \cite{Chernozhukov2018Double} for a formal treatment. 
+
+\begin{lemma}
+    
+    \label{lem: est_Neyman}
+    The function in moment condition (\ref{eq: est_moment}) is orthogonal at the point with true parameter $(\chi_0,\eta^{\dagger})$ \footnote{Since $\eta^{\dagger}$ approximates $\eta^{\star}$ arbitrarily well, we deem $\eta^{\dagger}$ solves the integral equations.}
+    with respect to all the nuisance parameter estimator $\widehat{\eta}$. 
+\end{lemma}
+\begin{proof}
+    \begin{align*}
+        E\left[\nabla_{\eta}m(\mathcal{O};\chi_0,\eta^{\dagger})^T(\widehat{\eta}-\eta^{\dagger})\right] &= E\left[\begin{bmatrix}
+            \nabla_{q_1}m(\mathcal{O};\chi_0,\eta^{\dagger}) \\
+            \nabla_{q_0}m(\mathcal{O};\chi_0,\eta^{\dagger}) \\
+            \nabla_{h_1}m(\mathcal{O};\chi_0,\eta^{\dagger}) \\
+            \nabla_{h_0}m(\mathcal{O};\chi_0,\eta^{\dagger})
+        \end{bmatrix}^T(\widehat{\eta}-\eta^{\dagger})\right] = E\left[\begin{bmatrix}
+            \mathds{1}_{A=1}(Y-h_1^{\dagger}(W,1,X)) \\
+            -\mathds{1}_{A=0}(Y-h_0^{\dagger}(W,0,X)) \\
+            -\mathds{1}_{A=1}q_1^{\dagger}(Z,1,X) + 1 \\
+            \mathds{1}_{A=0}q_0^{\dagger}(Z,0,X) - 1
+        \end{bmatrix}^T(\widehat{\eta}-\eta^{\dagger})\right] \\
+        &= E\left[\begin{bmatrix}
+            \mathds{1}_{A=1}(Y-h_1^{\dagger}(W,1,X)) \\
+            -\mathds{1}_{A=0}(Y-h_0^{\dagger}(W,0,X)) \\
+            -\mathds{1}_{A=1}q_1^{\dagger}(Z,1,X) + 1 \\
+            \mathds{1}_{A=0}q_0^{\dagger}(Z,0,X) - 1
+        \end{bmatrix}^T\begin{bmatrix}
+            \widehat{q}_1(Z,1,X)-q_1^{\dagger}(Z,1,X) \\
+            \widehat{q}_0(Z,1,X)-q_0^{\dagger}(Z,1,X) \\
+            \widehat{h}_1^*(W,1,X)-h_1^{\dagger}(W,1,X) \\
+            \widehat{h}_0^*(W,1,X)-h_0^{\dagger}(W,1,X) \\
+        \end{bmatrix}\right] \\
+        &= E_{ZX}\left[(\widehat{q}_1(Z,1,X)-q_1^{\dagger}(Z,1,X))E[\mathds{1}_{A=1}(Y-h_1^{\dagger}(W,1,X))|Z,X]\right] \\
+        &\phantom{+} +E_{ZX}\left[(\widehat{q}_1(Z,1,X)-q_1^{\dagger}(Z,1,X))E[-\mathds{1}_{A=0}(Y-h_0^{\dagger}(W,0,X))|Z,X]\right] \\
+        &\phantom{++} +E_{WX}\left[(\widehat{h}_1^*(W,1,X)-h_1^{\dagger}(W,1,X))E[-\mathds{1}_{A=1}q_1^{\dagger}(Z,1,X)+1|W,X]\right] \\
+        &\phantom{+++} +E_{WX}\left[(\widehat{h}_1^*(W,1,X)-h_1^{\dagger}(W,1,X))E[\mathds{1}_{A=0}q_0^{\dagger}(Z,0,X)-1|W,X]\right]
+    \end{align*}
+    By the integral equation determining the existence of the bridge functions, 
+    we immediately have that the above moment function is 0.
+\end{proof}
+
+Next we show that the rate of convergence of estimators $\widehat{q}^*$, $\widehat{h}^*$ built by dual kernel embedding method 
+to the true boundedly continuous bridge functions is able to reach $\mathcal{O}_p(n^{-\frac{1}{4}})$
+when the singular values of $\widehat{R}_{\lambda_1}$ and $R_{\lambda_1}$ are bounded away from 0 from below. 
+
+\begin{lemma}
+
+    \label{lem: est_slowrate}
+    Suppose the spectra of $\widehat{R}_{\lambda_1}$ and $R_{\lambda_1}$ are bounded away from 0 from below. 
+    Let $\lambda_2=n^{-\beta}$ for $\beta>0$ to make the kernel embedded estimators $\widehat{q}_a^*$, $\widehat{h}_a^*$ asymptotically converges to the true bridge functions $q_a^{\dagger}$, $h_a^{\dagger}$. 
+    Then the rate of convergence of the square difference in RKHS norm is able to reach $\mathcal{O}_p(n^{-\frac{1}{2}})$ when $\beta>\frac{1}{4}$. 
+\end{lemma}
+\begin{proof}
+    Recall that in Theorem \ref{thm: est_kernelembeddedtotrue} and Theorem \ref{thm: est_empiricaltokernel} 
+    we have the asymptotic rate of convergences given by 
+    \begin{align*}
+        \|\widehat{q}_a^*-q_a^{\dagger}\|^2_F &\leq \|\widehat{q}_a^*-q_a^*\|^2_F + \|q_a^*-q_a^{\dagger}\|^2_F + 2\|\widehat{q}_a^*-q_a^*\|_F\|q_a^*-q_a^{\dagger}\|_F \\
+                                              &= \mathcal{O}_p(n^{-1}) + \mathcal{O}_p(n^{-2\beta}) + \mathcal{O}(n^{-\beta-\frac{1}{2}}).
+    \end{align*}
+    The three curves $-1$, $-2\beta$ and $-\beta-\frac{1}{2}$ come across at $\beta=\frac{1}{2}$. 
+    When $0<\beta<\frac{1}{2}$, we have $-2\beta>-\beta-\frac{1}{2}>-1$, while $-1>-\beta-\frac{1}{2}>-2\beta$
+    on the other side of the intersection. 
+    So, the dominant rate of convergence for the two cases are $\left\{\begin{aligned}
+        &\mathcal{O}_p(n^{-2\beta}),\ \text{if }0<\beta<\frac{1}{2}, \\
+        &\mathcal{O}_p(n^{-1}),\ \text{if }\beta\geq\frac{1}{2}.
+    \end{aligned}\right.$ 
+    To make the rate of convergence faster than $\mathcal{O}_p(n^{-\frac{1}{2}})$, 
+    we need $\beta\in(\frac{1}{4},\frac{1}{2})\bigcup[\frac{1}{2},+\infty)$, which is just $\beta>\frac{1}{4}$.
+\end{proof}
+
+However, when the spectra of $\widehat{R}_{\lambda_1}$ and $R_{\lambda_1}$ are not bounded away from 0 from below, 
+the rate of convergence may become slower than $\mathcal{O}_p(n^{-\frac{1}{4}})$ or doesn't exist considering the speed of $\|q_a^*-q_a^{\dagger}\|^2_F$.
+This is a fatal uncertainty that can't guarantee the asymptotic normality of the kernel embedded PDR estimator. 
+
+\begin{theorem}
+    
+    \label{thm: est_notnormalDML}
+    When 
+    \begin{enumerate}
+        \item $\operatorname{Var}(\mathds{1}_{A=1}q_1^{\dagger}(Z,1,X)[Y-h_1^{\dagger}(W,1,X)] - \mathds{1}_{A=0}q_0^{\dagger}(Z,0,X)[Y-h_0^{\dagger}(W,0,X)] + h_1^{\dagger}(W, 1, X)-h_0^{\dagger}(W,0,X))<\infty$;
+        \item The spectra of $\widehat{R}_{\lambda_1}$ and $R_{\lambda_1}$ are bounded away from 0 from below;
+        \item The kernel functions are bounded and smooth; 
+        \item The regularizer $\lambda_2=n^{-\beta}$ has an exponent larger than $\frac{1}{4}$, 
+    \end{enumerate}
+    the DML method succeeds to construct an asymptotically normal PDR estimator using the kernel embedded estimator of the two bridge functions, 
+    i.e.  
+    \begin{equation*}
+        \sqrt{n_c}(\widehat{\chi}-\chi_0)\rightarrow\mathcal{N}(0,\Sigma), 
+    \end{equation*}
+    where $n_c$ is the size of training set and 
+    \begin{equation*}
+        \Sigma = \operatorname{Var}(\mathds{1}_{A=1}q_1^{\dagger}(Z,1,X)[Y-h_1^{\dagger}(W,1,X)] - \mathds{1}_{A=0}q_0^{\dagger}(Z,0,X)[Y-h_0^{\dagger}(W,0,X)] + h_1^{\dagger}(W, 1, X)-h_0^{\dagger}(W,0,X))
+    \end{equation*}
+\end{theorem}
+\begin{proof}
+    We split the dataset $\mathcal{D}$ into an auxiliary set $\mathcal{D}_I$ to perform the dual kernel embedding method to construct the 
+    kernel embedded estimators $\widehat{q}_a^*$, $\widehat{h}_a^*$, and a training set $\mathcal{D}_{I^c}$ to estimate the ATE with PDR estimator.
+    Here $\mathcal{D}_{I^c}\bigcup\mathcal{D}_I=\mathcal{D}$ and $\mathcal{D}_{I^c}\bigcap\mathcal{D}_I=\emptyset$. 
+    We assume the sample sizes of the auxiliary set and training set are $n=|\mathcal{D}_I|$ and $n_c=|\mathcal{D}_{I^c}|$ with the same magnitude.
+    
+    The PDR estimator $\widehat{\chi}$ solves the empirical moment condition of (\ref{eq: est_moment}) with $\widehat{\eta}=(q_a^*,h_a^*)$, 
+    which means $\frac{1}{n_c}\sum_{i\in I^c}^{n_c}m(\mathcal{O}_i;\widehat{\chi},\widehat{\eta})=0$. 
+    By mean value theorem, we have 
+    \begin{align}
+        \label{eq: est_meanvalue}
+        \frac{1}{n_c}\sum_{i\in I^c}^{n_c}m(\mathcal{O}_i;\widehat{\chi},\widehat{\eta}) &= \frac{1}{n_c}\sum_{i\in I^c}^{n_c}m(\mathcal{O}_i;\chi_0,\widehat{\eta}) + \frac{1}{n_c}\sum_{i\in I^c}^{n_c}\nabla_{\chi}m(\mathcal{O}_i;\tilde{\chi},\widehat{\eta})(\widehat{\chi}-\chi_0) \notag\\
+                                                                                       0 &= \frac{1}{n_c}\sum_{i\in I^c}^{n_c}m(\mathcal{O}_i;\chi_0,\widehat{\eta}) - (\widehat{\chi}-\chi_0) \notag\\
+                                          \Longrightarrow\sqrt{n_c}(\widehat{\chi}-\chi_0) &= \frac{1}{\sqrt{n_c}}\sum_{i\in I^c}^{n_c}m(\mathcal{O}_i;\chi_0,\widehat{\eta}), 
+    \end{align}
+    where $\tilde{\chi}=\lambda\widehat{\chi}+(1-\lambda)\chi_0$, for $\lambda\in(0,1)$.
+    We Taylor expand the right hand side of (\ref{eq: est_meanvalue}) with respect to $\eta$ to the order 2 around $\eta^{\dagger}=(q_a^{\dagger},h_a^{\dagger})$. 
+    \begin{align*}
+        \frac{1}{\sqrt{n_c}}\sum_{i\in I^c}^{n_c}m(\mathcal{O}_i;\chi_0,\widehat{\eta}) &= \underbrace{\frac{1}{\sqrt{n_c}}\sum_{i\in I^c}^{n_c}m(\mathcal{O}_i;\chi_0,\eta^{\dagger})}_{I_1} + \underbrace{\frac{1}{\sqrt{n_c}}\sum_{i\in I^c}^{n_c}\nabla_{\eta}m(\mathcal{O}_i;\chi_0,\eta^{\dagger})^T(\widehat{\eta}-\eta^{\dagger})}_{I_2} \\
+                                                                                        & \phantom{\frac{1}{\sqrt{n_c}}\sum_{i\in I^c}^{n_c}} +\underbrace{\frac{1}{\sqrt{n_c}}\sum_{i\in I^c}^{n_c}(\widehat{\eta}-\eta^{\dagger})^T\nabla_{\eta\eta}m(\mathcal{O}_i;\chi_0,\eta^{\dagger})(\widehat{\eta}-\eta^{\dagger})}_{I_3} + \frac{1}{\sqrt{n_c}}o(\|\widehat{\eta}-\eta^{\dagger}\|^2).
+    \end{align*}
+    By the central limit theorem, $I_1\longrightarrow\mathcal{N}(0,\Sigma)$, with $\Sigma=E[m^2(\mathcal{O};\chi_0,\eta^{\dagger})]$, 
+    and $I_2\longrightarrow\mathcal{N}(E_{\mathcal{D}_{I^c}}[\nabla_{\eta}m(\mathcal{O};\chi_0,\eta^{\dagger})^T(\widehat{\eta}-\eta^{\dagger})], \text{Var}_{\mathcal{D}_{I^c}}(\nabla_{\eta}m(\mathcal{O};\chi_0,\eta^{\dagger})^T(\widehat{\eta}-\eta^{\dagger})))$. 
+    Since Lemma \ref{lem: est_Neyman} shows that\footnote{We denote $E[\cdot|\mathcal{D}_I]$ by $E_{\mathcal{D}_{I^c}}$ when both auxiliary and training sets appear.} $E_{\mathcal{D}_{I^c}}[\nabla_{\eta}m(\mathcal{O};\chi_0,\eta^{\dagger})^T(\widehat{\eta}-\eta^{\dagger})]=0$, 
+    we check the variance. 
+    By the bounded continuity assumption of the bridge functions, we assume $\|\nabla_{\eta}m(\mathcal{O};\chi_0,\eta^{\dagger})\|_1^2$ is uniformly upper bounded by constant $B>0$ over $\mathcal{O}$.
+    In fact, 
+    \begin{align*}
+        \text{Var}_{\mathcal{D}_{I^c}}(\nabla_{\eta}m(\mathcal{O};\chi_0,\eta^{\dagger})^T(\widehat{\eta}-\eta^{\dagger})) &= E_{\mathcal{D}_{I^c}}[(\widehat{\eta}-\eta^{\dagger})^T\nabla_{\eta}m(\mathcal{O}_i;\chi_0,\eta^{\dagger})\nabla_{\eta}m(\mathcal{O}_i;\chi_0,\eta^{\dagger})^T(\widehat{\eta}-\eta^{\dagger})] \\
+                                                                                                                             &\leq E_{\mathcal{D}_{I^c}}[\|\widehat{\eta}-\eta^{\dagger}\|^2_1\|\nabla_{\eta}m(\mathcal{O}_i;\chi_0,\eta^{\dagger})\|^2_1] \\
+                                                                                                                             &= B\sum_{a\in\{0,1\}}\left[\|\widehat{q}_a^*-q_a^{\dagger}\|^2\|\tilde{\mu}_{(ZX)}\|^2+\|\widehat{h}_a^*-h_a^{\dagger}\|^2\|\tilde{\mu}_{(WX)}\|^2\right].
+    \end{align*}
+    By the boundedness of RKHS elements, we have that $\text{Var}_{\mathcal{D}_{I^c}}(\nabla_{\eta}m(\mathcal{O};\chi_0,\eta^{\dagger})^T(\widehat{\eta}-\eta^{\dagger}))$ converges to 0 in probability 
+    with a rate of convergence equivalent to the one of $\|\widehat{q}_a^*-q_a^{\dagger}\|^2$. 
+    This means $I_2$ will asymptotically degenerate to 0 as $\|\widehat{q}_a^*-q_a^{\dagger}\|^2$ and $\|\widehat{h}_a^*-h_a^{\dagger}\|^2$ converge to 0.
+
+    As for $I_3$, since $\nabla_{\eta\eta}m(\mathcal{O}_i;\chi_0,\eta^{\dagger})=\begin{bmatrix}
+        0 & 0 & 1-\mathds{1}_{A=1} & -1 \\
+        0 & 0 & 1 & \mathds{1}_{A=0}-1 \\
+        -\mathds{1}_{A=1} & 0 & 0 & 0 \\
+        0 & \mathds{1}_{A=0} & 0 & 0
+    \end{bmatrix}$ is irrelevant to $\eta$ and $\chi$, we know its eigenvalues are upper bounded by a positive constant which we denote by $M$ for all $A\in\{0,1\}$.
+    Then as $n_c\longrightarrow\infty$, $I_3\lesssim M\sqrt{n_c}E_{\mathcal{D}_{I^c}}[\|\widehat{\eta}-\eta^{\dagger}\|^2_1]$, 
+    which has a rate of convergence equivalent to the one of $\sqrt{n_c}\|\widehat{q}_a^*-q_a^{\dagger}\|^2$.
+
+    Hence the rate of convergence of $I_2+I_3$ is dominated by $I_3$. 
+    As discussed in Lemma \ref{lem: est_slowrate}, we have that when $\beta>\frac{1}{4}$, 
+    the rate of convergence of $\|\widehat{q}_a^*-q_a^{\dagger}\|^2$ is able to exceed $\mathcal{O}_p(n^{-\frac{1}{2}})$ 
+    and gives a convergence to 0 for $I_3$.
+
+    Therefore, by (\ref{eq: est_meanvalue}), $\sqrt{n_c}(\widehat{\chi}-\chi_0)$ asymptotically approximates to a normal distribution $\mathcal{N}(0,\Sigma)$, 
+    with 
+    \begin{align*}
+        \Sigma&=E[m^2(\mathcal{O};\chi_0,\eta^{\dagger})] \\
+              &=\operatorname{Var}(\mathds{1}_{A=1}q_1^{\dagger}(Z,1,X)[Y-h_1^{\dagger}(W,1,X)] - \mathds{1}_{A=0}q_0^{\dagger}(Z,0,X)[Y-h_0^{\dagger}(W,0,X)] + h_1^{\dagger}(W, 1, X)-h_0^{\dagger}(W,0,X)), 
+    \end{align*} 
+    as $n, n_c\rightarrow\infty$. 
+\end{proof}
+
+When applied to real world cases, the variance can be estimated by sample variance $S$ of the kernel embedded PDR estimator, 
+since we can show $S$ is consistent to the variance by the same trick used in Corollary \ref{cor: est_secondempiricaltokernel} and Theorem \ref{thm: est_consistencyATE}. 
+By Slutsky's lemma, we can perform a hypothesis test on whether the true ATE is 0 using $S$. 
+The hypothesis is $H_0: \chi_0=0\leftrightarrow H_1: \chi_0\neq 0$. 
+Let $Z_{\frac{\alpha}{2}}$ be the upper $\frac{\alpha}{2}$ percentile of normal distribution. 
+The corresponding statistic and confidence interval with significance level $\alpha$ are
+\begin{equation*}
+    Z:= \frac{\widehat{\chi}}{\sqrt{\frac{S}{n_c}}},\ [\widehat{\chi}-\sqrt{\frac{S}{n_c}}Z_{\frac{\alpha}{2}}, \widehat{\chi}+\sqrt{\frac{S}{n_c}}Z_{\frac{\alpha}{2}}]. 
+\end{equation*}
+We compute the p-value for this test by $2Pr(Z_0\geq|Z|)$, where $Z_0\sim\mathcal{N}(0,1)$.
+
+\subsubsection{Numerical test}
+
+In this section, we explain the numerical test of the kernel embedded PDR estimator (\ref{eq: est_ATEestimator}) and 
+analyze its convergence behaviors on a synthetic dataset.
+
+\paragraph{Data generation}
+
+The data generation scheme of the numerical test is based on the graphical model \ref{fig: pre_dagprox}. 
+We assume the data is sequentially generated as follows. 
+
+\begin{align*}
+    U &= \epsilon_1 \\
+    X &= 0.5U + \epsilon_2 \\
+    Z &= 0.3U + 0.4X + \epsilon_3 \\
+    W &= 0.6U + 0.3X + \epsilon_4 \\
+    A &\sim \text{Bernoulli}(p),\ p=E[\mathbb{1}_{0.3U + 0.5X + 0.7Z+\epsilon_5 >0}] \\
+    Y^1 &= \mu_1 + 0.07U + 0.02X + 0.08W + 0.1\epsilon_6 \\
+    Y^0 &= \mu_0 + 0.03U + 0.04X + 0.03W + 0.1\epsilon_7 \\
+    Y &= \mathbb{1}_{A=1}Y^1 + \mathbb{1}_{A=0}Y^0, 
+\end{align*}
+where $\epsilon_1,\cdots,\epsilon_7$ are i.i.d. from $\mathcal{N}(0,1)$. 
+
+According to the model, since $E[U]=E[X]=E[W]=0$, the true ATE is given by 
+\begin{equation*}
+    \chi = E[Y^1]-E[Y^0] = \mu_1-\mu_0.
+\end{equation*}
+
+\paragraph{Kernel function}
+
+To compute the empirical regularized kernel embedded solution $\widehat{q}_a^*$ (\ref{eq: est_kernelrepresentor}) by Proposition \ref{prop: est_kernelrepresentor}, 
+we choose the Gaussian RBF kernel to construct the RKHSs. The kernel is given by 
+\begin{align*}
+    k((W,X),(W',X')) &:= \exp\{-\gamma\|[W X]-[W' X']\|^2\}, \\
+    \tilde{l}((Z,X),(Z',X')) &:= \exp\{-\gamma\|[Z X]-[Z' X']\|^2\}, \\
+    l((Z,A,X),(Z',A',X')) &:= \mathbb{1}_{A=a}\mathbb{1}_{A'=a}\exp\{-\gamma\|[Z X]-[Z' X']\|^2\},\ \forall a\in\{0,1\}, 
+\end{align*}
+where $[\cdot \cdot]$ is a concatenated vector, i.e. $ \forall A,B\in\mathbb{R}^{n}$, then $[A B]=A\oplus B\in\mathbb{R}^{2n}$. 
+
+\paragraph{Hyperparameter selection}
+
+Since matrix $L(K+n\lambda_1I_n)^{-1}KL+n\lambda_2L$ is not always invertible, 
+we turn to the Tikhonov regularized solution of the kernel embedded coefficient $\widehat{\Lambda}:=(C^*C+\lambda I)C^*b$ (\ref{eq: est_regularizedlambda}). 
+This leads to selection of 4 parameters: $\lambda\in(0,+\infty)$, $\gamma\in(0,+\infty)$, $\lambda_1\in(0,+\infty)$ and $\beta\in(0,+\infty)$. 
+As for $\lambda$ and $\gamma$, we fix them by positive constants through out the hyperparameter tuning 
+since they only influence the stability of the estimator but will not bring unexpected bias. 
+Since in real world scenarios, the data distribution usually doesn't satisfy the lower bounded spectra of $\widehat{R}_{\lambda_1}$ and $R_{\lambda_1}$, 
+hence we can't expect a good convergence by merely setting a large enough $\beta$. 
+To facilitate finding the optimal values,
+we choose some potentially optimal points and restrict the searching area of the parameters within 
+\begin{align*}
+    \lambda_1 &\in \{1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1\} \\
+    \beta &\in \{1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1, 1e+1, 1e+2\}.
+\end{align*}
+
+Recall that Proposition \ref{prop: est_uniqdualf} shows that the dual function measures the error 
+that the estimated bridge function brings to the integral equation (\ref{eq: est_newintegral}). 
+We use the empirical square error of the kernel embedded dual function
+\begin{equation}
+    \label{eq: est_dualasloss}
+    \frac{1}{n}\sum_{i=1}^n\mathds{1}_{a_i=1}(\widehat{u}^*_1(w_i,x_i))^2 + \frac{1}{n}\sum_{i=1}^n\mathds{1}_{a_i=0}(\widehat{u}^*_0(w_i,x_i))^2 + \frac{1}{n}\sum_{i=1}^n\mathds{1}_{a_i=1}(\widehat{u}^*_1(z_i,x_i))^2 + \frac{1}{n}\sum_{i=1}^n\mathds{1}_{a_i=0}(\widehat{u}^*_0(z_i,x_i))^2
+\end{equation}
+as the loss function to choose hyperparameters.
+
+Of note that for a set of observations, we split the dataset equally to build the kernel embedded estimators with one half, 
+and estimate ATE using the other half. 
+We shuffle the whole dataset for 3 times to generate 3 random splittings. 
+The total loss is the average of the 3 losses (\ref{eq: est_dualasloss}) on all shuffled dataset. 
+
+When hyperparameter tuner returns the optimal values of $\lambda_1$ and $\beta$, 
+we apply them directly to the following tests.
+
+\paragraph{Test on consistency}
+
+We conduct two simple experiments on the convergence of the ATE estimator with $\mu_1=2$ and $\mu_0=-1$. 
+For the first one, 
+we want to test the mean absolute error (MAE) of the ATE estimator as sample size grows from 50 to 10050 with the interval of 500 between two adjacent points. 
+We first choose the hyperparameters from the potential ranges and apply the optimal set directly to the test. 
+The other one is an experiment on the MAE as beta grows when sample size is fixed to 3000, 
+in which we choose the test points as $(-1e+2, -1e+1, -1, -1e-1, -1e-2, 0, 1e-2, 1e-1, 1, 1e+1, 1e+2, 1e+3)$, 
+and set $\lambda_1=1e-1$.
+Through out the two experiments, we fix $\lambda=1e-1$ and $\gamma=1e-3$, 
+and run 100 times for each test point to compute average.
+
+\begin{figure}[h]
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/MAE_vs_sample.pdf}
+        \caption{\centering MAE vs. sample size}
+        \label{fig: est_MAE_n}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/MAE_vs_beta.pdf}
+        \caption{\centering MAE vs. Beta}
+        \label{fig: est_MAE_beta}
+    \end{minipage}
+\end{figure}
+
+The results are shown in Figure \ref{fig: est_MAE_n} and \ref{fig: est_MAE_beta}.
+
+The hyperparameter tuning process returns the optimal set of $\lambda_1$ and $\beta$ by $(1, 100)$, 
+which witnesses larger $\lambda_1$ will better increase the convergence speed of $\|\widehat{R}_{\lambda_1}-R_{\lambda_1}\|_{\mathcal{L}(F)}$, 
+as shown by (\ref{eq: est_consistency3}), 
+and therefore speed up the convergence of $\|\widehat{q}^*_a-q^*_a\|_F$. 
+In addition, this implies for the data distribution we are using, 
+the spectra of operators $\widehat{R}_{\lambda_1}$ and $R_{\lambda_1}$ are bounded away from 0 from below 
+because 0 is possibly not a part of the spectra any more for compact operators on finite dimensional spaces. 
+This makes the optimal $\beta$ as large as possible. 
+In fact, Figure \ref{fig: est_MAE_beta} helps illustrate this statement.
+Moreover, from Figure \ref{fig: est_MAE_n}, 
+we have that strong enough regularizer parameters have already maintained the consistency of the estimator when sample size is small 
+but still can't control the variance. 
+When sample size grows large, the variance of estimator gradually decreases.
+
+\paragraph{Test on asymptotic normality}
+
+We generate a dataset with sample size 10000 using the synthetic data generation rule. 
+The ATE estimation $\widehat{\chi}$ on the dataset is 3.12.
+Then we perform 1000 bootstrap resamplings on the generated dataset, 
+and calculate the estimated ATE for each bootstrapped dataset. 
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.5\textwidth]{figures/histogram.pdf}
+    \caption{\centering The histogram of the bootstrap ATE estimations}
+    \label{fig: est_histogram}
+\end{figure}
+
+The histogram of the result, Figure \ref{fig: est_histogram}, 
+shows that the ATE estimations approximately form a normal distribution 
+because the skewness and kurtosis coefficients are nearly 0. 
+
+Furthermore, we use centered bootstrap percentile test and compute p-value to compare with the p-value computed by the two-tailed test for the mean of the standard normal distribution. 
+Denote by $(\tilde{\chi}_i)_{1\leq i\leq 1000}$ the ATE estimations for all the bootstrap resampled datasets, 
+and $\bar{\chi}$ the mean of them. 
+The formula for p-value is given by 
+\begin{equation*}
+    P_{bp} = \frac{1+\sum_{i=1}^{1000}\mathds{1}_{\tilde{\chi}_i-\bar{\chi}\geq |\widehat{\chi}|}}{1+1000}.
+\end{equation*}
+In our test, $P_{bp}=9.99e-04=\frac{1}{1001}$, 
+meaning that $\widehat{\chi}$ is outside the density formed by the centered bootstrap ATE estimations. 
+
+By sample deviation $S=0.5352$, the Z-statistic $\frac{\widehat{\chi}}{\sqrt{\frac{S}{n_c}}}=\frac{3.12}{\sqrt{\frac{0.5352}{1000}}}$ is 411.6110, 
+which locates at the extremely far right tail of the standard normal distribution. 
+The p-value 
+\begin{equation*}
+    P_{Wald} = 2Pr(1-\Phi(411.6110)) \approx 0, 
+\end{equation*}
+matches $P_{bp}$ observed by bootstrap test. 
