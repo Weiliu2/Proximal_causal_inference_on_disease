@@ -9,6 +9,8 @@ the method transforms the conditional expectation equation into a minimax proble
 The method is based on the definition of the universal kernel\cite{steinwart2001influence}, 
 whereby any bounded continuous function can be well approximated by functions belonging to the reproducing kernel Hilbert space (RKHS) induced by a universal kernel. 
 Consequently, the solution obtained via kernel embedding can approximate the original bounded continuous function arbitrarily well.
+Dai et al. proposed multiple stochastic gradient descent based algorithms to calculate functions of interest numerically and 
+discussed the convergence behavior.
 
 Following Dai et al., 
 Muandet et al.\cite{muandet2020dualinstrumentalvariableregression} applied the dual kernel embedding method to instrumental variable problems and 
@@ -398,16 +400,20 @@ we can use the Tikhonov regularized solution instead, which is given by
 where $C:=L(K+n\lambda_1I_n)^{-1}KL+n\lambda_2L$, $b:=L(K+n\lambda_1I_n)^{-1}K\mathds{1}_n$. 
 (\ref{eq: est_regularizedlambda}) converges to the minimum-norm solution as $\lambda\rightarrow 0$. 
 
-Of note, since $q_a\in\tilde{F}\bigcap F$, the coefficients of the linear expansion of $q_a$ with respect to the feature maps 
-in $F$ and $\tilde{F}$ have the following matching rule: i) the coefficient $\alpha_i$ is shared in both spaces if $a_i=a$ and 
-ii) the coefficient $\alpha_i$ given by $F$ is 0 if $a_i\neq a$. \footnote{Consider that only samples with treatment $a$ is included in $\tilde{F}$.}
-However, if going back to the Tikhonov regularized solution (\ref{eq: est_regularizedlambda}) we have derived, 
-it might not strictly follows the matching rule, 
-since its norm must be minimal among all the solutions and hence is probably not the true kernel representor (\ref{eq: est_kernelrepresentor_exact}) that we want.
-This means the computed Tikhonov regularized solution (\ref{eq: est_regularizedlambda}) in numerical experiments has risks to be scaled by a scalar compared to the true solution. 
-To decrease the risk of the unwanted results, 
-one can divide the sample set by treatment and compute $E[Y^a]$ using the corresponding samples with an estimator, 
-but not using the whole sample set to compute $E[Y^1]$ and $E[Y^0]$ at the same time. 
+\begin{remark}
+    \label{rem: est_dilemmaofestimator}
+    Of note, since $q_a\in\tilde{F}\bigcap F$, the coefficients of the linear expansion of $q_a$ with respect to the feature maps 
+    in $F$ and $\tilde{F}$ have the following matching rule: i) the coefficient $\alpha_i$ is shared in both spaces if $a_i=a$ and 
+    ii) the coefficient $\alpha_i$ given by $F$ is 0 if $a_i\neq a$. \footnote{Consider that only samples with treatment $a$ is included in $\tilde{F}$.}
+    However, if going back to the Tikhonov regularized solution (\ref{eq: est_regularizedlambda}) we have derived, 
+    it might not strictly follows the matching rule, 
+    since its norm must be minimal among all the solutions and hence is probably not the true kernel representor (\ref{eq: est_kernelrepresentor_exact}) that we want.
+    This means the computed Tikhonov regularized solution (\ref{eq: est_regularizedlambda}) in numerical experiments has risks to be scaled by a scalar compared to the true solution. 
+    To decrease the risk of the unwanted results, 
+    one can divide the sample set by treatment and compute $E[Y^a]$ using the corresponding samples with an estimator, 
+    but not using the whole sample set to compute $E[Y^1]$ and $E[Y^0]$ at the same time. 
+\end{remark}
+
 
 \subsection{Tikhonov regularized kernel embedded outcome confounding bridge function, empirical form}
 In this part we use dual kernel embedding method to give a closed-form expression of outcome confounding bridge function on an RKHS and its empirical form.
@@ -1174,18 +1180,36 @@ This is a fatal uncertainty that can't guarantee the asymptotic normality of the
     as $n, n_c\rightarrow\infty$. 
 \end{proof}
 
-When applied to real world cases, the variance can be estimated by sample variance $S$ of the kernel embedded PDR estimator, 
+When applied to real world cases, 
+the variance can be estimated by sample variance $S$ of the kernel embedded PDR estimator $\widehat{\chi}$, 
 since we can show $S$ is consistent to the variance by the same trick used in Corollary \ref{cor: est_secondempiricaltokernel} and Theorem \ref{thm: est_consistencyATE}. 
-By Slutsky's lemma, we can perform a hypothesis test on whether the true ATE is 0 using $S$. 
+However, as stated in Remark \ref{rem: est_dilemmaofestimator}, 
+we estimate $E[Y^1]$ and $E[Y^0]$ respectively because of the uncertainty brought by least square solution. 
+Hence, we can only construct $S$ with the sample variance of $\mathds{1}_{A=a}q_1^{\dagger}(Z,a,X)[Y-h_a^{\dagger}(W,a,X)]+ h_a^{\dagger}(W, a, X)$, $a\in\{0,1\}$. 
+As implied by Theorem \ref{thm: est_notnormalDML}, using the notation in Theorem \ref{thm: est_consistencyATE}, we have 
+\begin{align*}
+    &\sqrt{n_{c1}}(\widehat{E}[Y^1]-E[Y^1])\xrightarrow{d}\mathcal{N}(0,\sigma_1^2), & \sqrt{n_{c0}}(\widehat{E}[Y^0]-E[Y^0])\xrightarrow{d}\mathcal{N}(0,\sigma_0^2).
+\end{align*}
+By the approach to constructing $\widehat{E}[Y^1]$ and $\widehat{E}[Y^0]$ given in Remark \ref{rem: est_dilemmaofestimator}, 
+$\widehat{E}[Y^1]$ is independent of $\widehat{E}[Y^0]$. 
+Then as $\sqrt{n_{c1}},\sqrt{n_{c2}}\rightarrow\infty$, we have 
+\begin{equation*}
+    \widehat{\chi}=\widehat{E}[Y^1]-\widehat{E}[Y^0]\xrightarrow{d}\mathcal{N}(\chi_0,\frac{\sigma_1^2}{n_{c1}}+\frac{\sigma_0^2}{n_{c0}}).
+\end{equation*}
+By Slutsky's lemma, we further have 
+\begin{equation*}
+    \frac{\widehat{\chi}-\chi_0}{\sqrt{\frac{\widehat{\sigma}_1^2}{n_1}+\frac{\widehat{\sigma}_0^2}{n_0}}}\xrightarrow{d}\mathcal{N}(0,1).
+\end{equation*}
+Therefore, we can perform a hypothesis test on whether the true ATE is 0 using $S=\frac{\widehat{\sigma}_1^2}{n_1}+\frac{\widehat{\sigma}_0^2}{n_0}$. 
 The hypothesis is $H_0: \chi_0=0\leftrightarrow H_1: \chi_0\neq 0$. 
-Let $Z_{\frac{\alpha}{2}}$ be the upper $\frac{\alpha}{2}$ percentile of normal distribution. 
+Let $Z_{\frac{\alpha}{2}}$ be the upper $\frac{\alpha}{2}$ percentile of standard normal distribution. 
 The corresponding statistic and confidence interval with significance level $\alpha$ are
 \begin{equation*}
-    Z:= \frac{\widehat{\chi}}{\sqrt{\frac{S}{n_c}}},\ [\widehat{\chi}-\sqrt{\frac{S}{n_c}}Z_{\frac{\alpha}{2}}, \widehat{\chi}+\sqrt{\frac{S}{n_c}}Z_{\frac{\alpha}{2}}]. 
+    Z:= \frac{\widehat{\chi}}{\sqrt{S}},\ [\widehat{\chi}-\sqrt{S}Z_{\frac{\alpha}{2}}, \widehat{\chi}+\sqrt{S}Z_{\frac{\alpha}{2}}]. 
 \end{equation*}
 We compute the p-value for this test by $2Pr(Z_0\geq|Z|)$, where $Z_0\sim\mathcal{N}(0,1)$.
 
-\subsubsection{Numerical test}
+\subsubsection{Numerical test on consistency and asymptotic normality}
 
 In this section, we explain the numerical test of the kernel embedded PDR estimator (\ref{eq: est_ATEestimator}) and 
 analyze its convergence behaviors on a synthetic dataset.
@@ -1200,10 +1224,10 @@ We assume the data is sequentially generated as follows.
     X &= 0.5U + \epsilon_2 \\
     Z &= 0.3U + 0.4X + \epsilon_3 \\
     W &= 0.6U + 0.3X + \epsilon_4 \\
-    A &\sim \text{Bernoulli}(p),\ p=E[\mathbb{1}_{0.3U + 0.5X + 0.7Z+\epsilon_5 >0}] \\
+    A &\sim \text{Bernoulli}(p),\ p=E[\mathds{1}_{0.3U + 0.5X + 0.7Z+\epsilon_5 >0}] \\
     Y^1 &= \mu_1 + 0.07U + 0.02X + 0.08W + 0.1\epsilon_6 \\
     Y^0 &= \mu_0 + 0.03U + 0.04X + 0.03W + 0.1\epsilon_7 \\
-    Y &= \mathbb{1}_{A=1}Y^1 + \mathbb{1}_{A=0}Y^0, 
+    Y &= \mathds{1}_{A=1}Y^1 + \mathds{1}_{A=0}Y^0, 
 \end{align*}
 where $\epsilon_1,\cdots,\epsilon_7$ are i.i.d. from $\mathcal{N}(0,1)$. 
 
@@ -1219,7 +1243,7 @@ we choose the Gaussian RBF kernel to construct the RKHSs. The kernel is given by
 \begin{align*}
     k((W,X),(W',X')) &:= \exp\{-\gamma\|[W X]-[W' X']\|^2\}, \\
     \tilde{l}((Z,X),(Z',X')) &:= \exp\{-\gamma\|[Z X]-[Z' X']\|^2\}, \\
-    l((Z,A,X),(Z',A',X')) &:= \mathbb{1}_{A=a}\mathbb{1}_{A'=a}\exp\{-\gamma\|[Z X]-[Z' X']\|^2\},\ \forall a\in\{0,1\}, 
+    l((Z,A,X),(Z',A',X')) &:= \mathds{1}_{A=a}\mathds{1}_{A'=a}\exp\{-\gamma\|[Z X]-[Z' X']\|^2\},\ \forall a\in\{0,1\}, 
 \end{align*}
 where $[\cdot \cdot]$ is a concatenated vector, i.e. $ \forall A,B\in\mathbb{R}^{n}$, then $[A B]=A\oplus B\in\mathbb{R}^{2n}$. 
 
@@ -1328,10 +1352,109 @@ The formula for p-value is given by
 In our test, $P_{bp}=9.99e-04=\frac{1}{1001}$, 
 meaning that $\widehat{\chi}$ is outside the density formed by the centered bootstrap ATE estimations. 
 
-By sample deviation $S=0.5352$, the Z-statistic $\frac{\widehat{\chi}}{\sqrt{\frac{S}{n_c}}}=\frac{3.12}{\sqrt{\frac{0.5352}{1000}}}$ is 411.6110, 
+By sample deviation $S=0.004472$ matching the standard deviation $0.0045$ calculated in bootstrap experiment, 
+the Z-statistic $\frac{\widehat{\chi}}{\sqrt{S}}=\frac{3.12}{\sqrt{0.004472}}$ is 699.65, 
 which locates at the extremely far right tail of the standard normal distribution. 
 The p-value 
 \begin{equation*}
-    P_{Wald} = 2Pr(1-\Phi(411.6110)) \approx 0, 
+    P = 2Pr(1-\Phi(699.65)) \approx 0, 
 \end{equation*}
 matches $P_{bp}$ observed by bootstrap test. 
+
+\subsubsection{Sensitivity analysis}
+
+Considering a symmetric situation, as shown by Figure \ref{fig: est_dagprox}, 
+we discuss how will the influences $\alpha: X\rightarrow Z, X\rightarrow W$, $\gamma: X\rightarrow A, X\rightarrow Y$,  
+and $\beta: Z\rightarrow A, W\rightarrow Y$ affect the accuracy of estimating ATE. 
+
+\begin{figure}[ht]
+    \begin{minipage}{0.5\textwidth}
+        \centering
+        \begin{tikzpicture}[
+            every node/.style={draw, circle, minimum size=1cm},
+            every path/.style={->, >=Stealth}
+        ]
+        % Define nodes
+        \node[dashed] (U) at (3,5) {$U$};
+        \node (X) at (3,3) {$X$};
+        \node (Z) at (0,3) {$Z$};
+        \node (W) at (6,3) {$W$};
+        \node (A) at (1,1) {$A$};
+        \node (Y) at (5,1) {$Y$};
+        % Draw edges
+        \draw[dashed] (U) -- (X);
+        \draw[dashed] (U) -- (Z);
+        \draw[dashed] (U) -- (W);
+        \draw[dashed] (U) -- (A);
+        \draw[dashed] (U) -- (Y);
+        \draw (X) -- node[above, draw=none, minimum size=0cm] {$\alpha$} (Z);
+        \draw (X) -- node[above, draw=none, minimum size=0cm] {$\alpha$} (W);
+        \draw (X) -- node[right, draw=none] {$\gamma$} (A);
+        \draw (X) -- node[left, draw=none] {$\gamma$} (Y);
+        \draw (A) -- (Y);
+        \draw (Z) -- node[left, draw=none] {$\beta$} (A);
+        \draw (W) -- node[right, draw=none] {$\beta$} (Y);
+        \end{tikzpicture}
+    \end{minipage}
+        \begin{minipage}{0.5\textwidth}
+        \centering
+        \begin{tikzpicture}[
+            every node/.style={draw, circle, minimum size=1cm},
+            every path/.style={->, >=Stealth}
+        ]
+        % Define nodes
+        \node[dashed] (U) at (3,5) {$U$};
+        \node (X) at (3,3) {$X$};
+        \node (Z) at (0,3) {$Z$};
+        \node (W) at (6,3) {$W$};
+        \node (A) at (1,1) {$A$};
+        \node (Y) at (5,1) {$Y$};
+        % Draw edges
+        \draw[dashed] (U) -- (X);
+        \draw[dashed] (U) -- (Z);
+        \draw[dashed] (U) -- (W);
+        \draw[dashed] (U) -- (A);
+        \draw[dashed] (U) -- (Y);
+        \draw (X) -- node[above, draw=none, minimum size=0cm] {$\alpha$} (Z);
+        \draw (X) -- node[above, draw=none, minimum size=0cm] {$\alpha$} (W);
+        \draw (X) -- node[right, draw=none] {$\gamma$} (A);
+        \draw (X) -- node[left, draw=none] {$\gamma$} (Y);
+        \draw (Z) -- node[left, draw=none] {$\beta$} (A);
+        \draw (W) -- node[right, draw=none] {$\beta$} (Y);
+        \end{tikzpicture}
+    \end{minipage}
+    \caption{\centering Influence model in sensitivity analysis}
+    \label{fig: est_dagprox}
+\end{figure}
+The corresponding data generation schemes are given in Table \ref{tab: est_datageneration}, 
+where $\epsilon_1,\cdots,\epsilon_7$ are i.i.d. from $\mathcal{N}(0,1)$. 
+\begin{table}
+    \centering
+    \begin{tabular}{c|c}
+        $\text{Causal relationship } A\rightarrow Y$ & $\text{No causal relationship } A\rightarrow Y$ \\
+        \hline \\
+        $\begin{aligned}
+            U &= \epsilon_1 \\
+            X &= 0.05U + \epsilon_2 \\
+            Z &= 0.04U + \alpha X + \epsilon_3 \\
+            W &= 0.04U + \alpha X + \epsilon_4 \\
+            A &\sim \text{Bernoulli}(p),\ p=E[\mathds{1}_{0.03U + \gamma X + \beta Z+\epsilon_5 >0}] \\
+            Y^1 &= \mu_1 + 0.03U + \gamma X + \beta W + \epsilon_6 \\
+            Y^0 &= \mu_0 + 0.03U + \gamma X + \beta W + \epsilon_7 \\
+            Y &= \mathds{1}_{A=1}Y^1 + \mathds{1}_{A=0}Y^0 
+        \end{aligned}$ & 
+        $\begin{aligned}
+            U &= \epsilon_1 \\
+            X &= 0.05U + \epsilon_2 \\
+            Z &= 0.04U + \alpha X + \epsilon_3 \\
+            W &= 0.04U + \alpha X + \epsilon_4 \\
+            A &\sim \text{Bernoulli}(p),\ p=E[\mathds{1}_{0.03U + \gamma X + \beta Z+\epsilon_5 >0}] \\
+            Y^1 &= \mu + 0.03U + \gamma X + \beta W + \epsilon_6 \\
+            Y^0 &= \mu + 0.03U + \gamma X + \beta W + \epsilon_7 \\
+            Y &= \mathds{1}_{A=1}Y^1 + \mathds{1}_{A=0}Y^0 
+        \end{aligned}$
+    \end{tabular}
+    \caption{\centering Data generation schemes of influence model in sensitivity analysis}
+    \label{tab: est_datageneration}
+\end{table}
+
