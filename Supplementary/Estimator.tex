@@ -1198,16 +1198,16 @@ Then as $\sqrt{n_{c1}},\sqrt{n_{c2}}\rightarrow\infty$, we have
 \end{equation*}
 By Slutsky's lemma, we further have 
 \begin{equation*}
-    \frac{\widehat{\chi}-\chi_0}{\sqrt{\frac{\widehat{\sigma}_1^2}{n_1}+\frac{\widehat{\sigma}_0^2}{n_0}}}\xrightarrow{d}\mathcal{N}(0,1).
+    \frac{\widehat{\chi}-\chi_0}{\sqrt{\frac{\widehat{\sigma}_1^2}{n_{c1}}+\frac{\widehat{\sigma}_0^2}{n_{c0}}}}\xrightarrow{d}\mathcal{N}(0,1).
 \end{equation*}
-Therefore, we can perform a hypothesis test on whether the true ATE is 0 using $S=\frac{\widehat{\sigma}_1^2}{n_1}+\frac{\widehat{\sigma}_0^2}{n_0}$. 
-The hypothesis is $H_0: \chi_0=0\leftrightarrow H_1: \chi_0\neq 0$. 
+Denote by $S=\frac{\widehat{\sigma}_1^2}{n_{c1}}+\frac{\widehat{\sigma}_0^2}{n_{c0}}$. 
+We can perform Wald ratio test on the hypothesis $H_0: \chi_0=0\leftrightarrow H_1: \chi_0\neq 0$. 
 Let $Z_{\frac{\alpha}{2}}$ be the upper $\frac{\alpha}{2}$ percentile of standard normal distribution. 
 The corresponding statistic and confidence interval with significance level $\alpha$ are
 \begin{equation*}
     Z:= \frac{\widehat{\chi}}{\sqrt{S}},\ [\widehat{\chi}-\sqrt{S}Z_{\frac{\alpha}{2}}, \widehat{\chi}+\sqrt{S}Z_{\frac{\alpha}{2}}]. 
 \end{equation*}
-We compute the p-value for this test by $2Pr(Z_0\geq|Z|)$, where $Z_0\sim\mathcal{N}(0,1)$.
+We compute the p-value for this test by $2Pr(|Z_0|\geq Z)$, where $Z_0\sim\mathcal{N}(0,1)$.
 
 \subsubsection{Numerical test on consistency and asymptotic normality}
 
@@ -1285,12 +1285,12 @@ we apply them directly to the following tests.
 We conduct two simple experiments on the convergence of the ATE estimator with $\mu_1=2$ and $\mu_0=-1$. 
 For the first one, 
 we want to test the mean absolute error (MAE) of the ATE estimator as sample size grows from 50 to 10050 with the interval of 500 between two adjacent points. 
-We first choose the hyperparameters from the potential ranges and apply the optimal set directly to the test. 
-The other one is an experiment on the MAE as beta grows when sample size is fixed to 3000, 
-in which we choose the test points as $(-1e+2, -1e+1, -1, -1e-1, -1e-2, 0, 1e-2, 1e-1, 1, 1e+1, 1e+2, 1e+3)$, 
+We choose the hyperparameters from the potential ranges and apply the optimal set directly to the test. 
+The second experiment is on the MAE as $\beta$ grows when sample size is fixed to 3000, 
+in which we choose the test points as $(1e-16, 1e-2, 1e-1, 1, 1e+1, 1e+2, 1e+3)$, 
 and set $\lambda_1=1e-1$.
 Through out the two experiments, we fix $\lambda=1e-1$ and $\gamma=1e-3$, 
-and run 100 times for each test point to compute average.
+and run 100 times for each test point to compute average and standard deviation.
 
 \begin{figure}[h]
     \begin{minipage}{0.45\textwidth}
@@ -1326,7 +1326,7 @@ When sample size grows large, the variance of estimator gradually decreases.
 
 \paragraph{Test on asymptotic normality}
 
-We generate a dataset with sample size 10000 using the synthetic data generation rule. 
+We generate a dataset with sample size 10000 using the same synthetic data generation rule of the consistency test. 
 The ATE estimation $\widehat{\chi}$ on the dataset is 3.12.
 Then we perform 1000 bootstrap resamplings on the generated dataset, 
 and calculate the estimated ATE for each bootstrapped dataset. 
@@ -1357,90 +1357,64 @@ the Z-statistic $\frac{\widehat{\chi}}{\sqrt{S}}=\frac{3.12}{\sqrt{0.004472}}$ i
 which locates at the extremely far right tail of the standard normal distribution. 
 The p-value 
 \begin{equation*}
-    P = 2Pr(1-\Phi(699.65)) \approx 0, 
+    P = 2\times(1-\Phi(699.65)) \approx 0, 
 \end{equation*}
 matches $P_{bp}$ observed by bootstrap test. 
 
 \subsubsection{Sensitivity analysis}
 
-Considering a symmetric situation, as shown by Figure \ref{fig: est_dagprox}, 
-we discuss how will the influences $\alpha: X\rightarrow Z, X\rightarrow W$, $\gamma: X\rightarrow A, X\rightarrow Y$,  
-and $\beta: Z\rightarrow A, W\rightarrow Y$ affect the accuracy of estimating ATE. 
+Considering a situation with invalid proxies, as shown by Figure \ref{fig: est_dagprox}, 
+we discuss how will the symmetric direct influence $\zeta: Z\rightarrow Y, W\rightarrow A$ affects the model accuracy on estimating ATE. 
 
 \begin{figure}[ht]
-    \begin{minipage}{0.5\textwidth}
-        \centering
-        \begin{tikzpicture}[
-            every node/.style={draw, circle, minimum size=1cm},
-            every path/.style={->, >=Stealth}
-        ]
-        % Define nodes
-        \node[dashed] (U) at (3,5) {$U$};
-        \node (X) at (3,3) {$X$};
-        \node (Z) at (0,3) {$Z$};
-        \node (W) at (6,3) {$W$};
-        \node (A) at (1,1) {$A$};
-        \node (Y) at (5,1) {$Y$};
-        % Draw edges
-        \draw[dashed] (U) -- (X);
-        \draw[dashed] (U) -- (Z);
-        \draw[dashed] (U) -- (W);
-        \draw[dashed] (U) -- (A);
-        \draw[dashed] (U) -- (Y);
-        \draw (X) -- node[above, draw=none, minimum size=0cm] {$\alpha$} (Z);
-        \draw (X) -- node[above, draw=none, minimum size=0cm] {$\alpha$} (W);
-        \draw (X) -- node[right, draw=none] {$\gamma$} (A);
-        \draw (X) -- node[left, draw=none] {$\gamma$} (Y);
-        \draw (A) -- (Y);
-        \draw (Z) -- node[left, draw=none] {$\beta$} (A);
-        \draw (W) -- node[right, draw=none] {$\beta$} (Y);
-        \end{tikzpicture}
-    \end{minipage}
-        \begin{minipage}{0.5\textwidth}
-        \centering
-        \begin{tikzpicture}[
-            every node/.style={draw, circle, minimum size=1cm},
-            every path/.style={->, >=Stealth}
-        ]
-        % Define nodes
-        \node[dashed] (U) at (3,5) {$U$};
-        \node (X) at (3,3) {$X$};
-        \node (Z) at (0,3) {$Z$};
-        \node (W) at (6,3) {$W$};
-        \node (A) at (1,1) {$A$};
-        \node (Y) at (5,1) {$Y$};
-        % Draw edges
-        \draw[dashed] (U) -- (X);
-        \draw[dashed] (U) -- (Z);
-        \draw[dashed] (U) -- (W);
-        \draw[dashed] (U) -- (A);
-        \draw[dashed] (U) -- (Y);
-        \draw (X) -- node[above, draw=none, minimum size=0cm] {$\alpha$} (Z);
-        \draw (X) -- node[above, draw=none, minimum size=0cm] {$\alpha$} (W);
-        \draw (X) -- node[right, draw=none] {$\gamma$} (A);
-        \draw (X) -- node[left, draw=none] {$\gamma$} (Y);
-        \draw (Z) -- node[left, draw=none] {$\beta$} (A);
-        \draw (W) -- node[right, draw=none] {$\beta$} (Y);
-        \end{tikzpicture}
-    \end{minipage}
-    \caption{\centering Influence model in sensitivity analysis}
+    \centering
+    \begin{tikzpicture}[
+        every node/.style={draw, circle, minimum size=1cm},
+        every path/.style={->, >=Stealth}
+    ]
+    % Define nodes
+    \node[dashed] (U) at (3,5) {$U$};
+    \node (X) at (3,3) {$X$};
+    \node (Z) at (0,3) {$Z$};
+    \node (W) at (6,3) {$W$};
+    \node (A) at (1,1) {$A$};
+    \node (Y) at (5,1) {$Y$};
+    % Draw edges
+    \draw[dashed] (U) -- (X);
+    \draw[dashed] (U) -- (Z);
+    \draw[dashed] (U) -- (W);
+    \draw[dashed] (U) -- (A);
+    \draw[dashed] (U) -- (Y);
+    \draw[color=red, line width=2pt] (Z) -- node[above, draw=none, minimum size=0cm] {$\zeta$} (Y);
+    \draw[color=red, line width=2pt] (W) -- node[above, draw=none, minimum size=0cm] {$\zeta$} (A);
+    \draw (X) -- node[above, draw=none, minimum size=0cm] {$\alpha$} (Z);
+    \draw (X) -- node[above, draw=none, minimum size=0cm] {$\alpha$} (W);
+    \draw (X) -- node[left, draw=none, minimum size=0cm] {$\gamma$} (A);
+    \draw (X) -- node[right, draw=none, minimum size=0cm] {$\gamma$} (Y);
+    \draw (A) -- (Y);
+    \draw (Z) -- node[left, draw=none, minimum size=0cm] {$\beta$} (A);
+    \draw (W) -- node[right, draw=none, minimum size=0cm] {$\beta$} (Y);
+    \end{tikzpicture}
+    \caption{\centering DAG of sensitivity analysis}
     \label{fig: est_dagprox}
 \end{figure}
-The corresponding data generation schemes are given in Table \ref{tab: est_datageneration}, 
-where $\epsilon_1,\cdots,\epsilon_7$ are i.i.d. from $\mathcal{N}(0,1)$. 
-\begin{table}
+We use the chance of the error of the first kind to measure the performance of the model in the sensitivity analysis.
+We define data generation schemes by negative (ATE=0) and positive (ATE$\neq$0) case generators, 
+which are given in Table \ref{tab: est_datageneration}.
+For both generators, $\epsilon_1,\cdots,\epsilon_7$ are i.i.d. from $\mathcal{N}(0,1)$. 
+\begin{table}[htbp]
     \centering
     \begin{tabular}{c|c}
-        $\text{Causal relationship } A\rightarrow Y$ & $\text{No causal relationship } A\rightarrow Y$ \\
+        Positive case & Negative case \\
         \hline \\
         $\begin{aligned}
             U &= \epsilon_1 \\
             X &= 0.05U + \epsilon_2 \\
             Z &= 0.04U + \alpha X + \epsilon_3 \\
             W &= 0.04U + \alpha X + \epsilon_4 \\
-            A &\sim \text{Bernoulli}(p),\ p=E[\mathds{1}_{0.03U + \gamma X + \beta Z+\epsilon_5 >0}] \\
-            Y^1 &= \mu_1 + 0.03U + \gamma X + \beta W + \epsilon_6 \\
-            Y^0 &= \mu_0 + 0.03U + \gamma X + \beta W + \epsilon_7 \\
+            A &\sim \text{Bernoulli}(p),\ p=E[\mathds{1}_{0.03U + \gamma X + \beta Z + \zeta W + \epsilon_5 >0}] \\
+            Y^1&\sim \text{Bernoulli}(p_1),\ p_1=E[\mathds{1}_{\mu_1 + 0.03U + \gamma X + \beta W + \zeta Z + \epsilon_6 > 0}] \\
+            Y^0&\sim \text{Bernoulli}(p_0),\ p_0=E[\mathds{1}_{\mu_0 + 0.03U + \gamma X + \beta W + \zeta Z + \epsilon_7 > 0}] \\
             Y &= \mathds{1}_{A=1}Y^1 + \mathds{1}_{A=0}Y^0 
         \end{aligned}$ & 
         $\begin{aligned}
@@ -1448,9 +1422,9 @@ where $\epsilon_1,\cdots,\epsilon_7$ are i.i.d. from $\mathcal{N}(0,1)$.
             X &= 0.05U + \epsilon_2 \\
             Z &= 0.04U + \alpha X + \epsilon_3 \\
             W &= 0.04U + \alpha X + \epsilon_4 \\
-            A &\sim \text{Bernoulli}(p),\ p=E[\mathds{1}_{0.03U + \gamma X + \beta Z+\epsilon_5 >0}] \\
-            Y^1 &= \mu + 0.03U + \gamma X + \beta W + \epsilon_6 \\
-            Y^0 &= \mu + 0.03U + \gamma X + \beta W + \epsilon_7 \\
+            A &\sim \text{Bernoulli}(p),\ p=E[\mathds{1}_{0.03U + \gamma X + \beta Z + \zeta W + \epsilon_5 >0}] \\
+            Y^1&\sim \text{Bernoulli}(p_1),\ p_1=E[\mathds{1}_{\mu + 0.03U + \gamma X + \beta W + \zeta Z + \epsilon_6 > 0}] \\
+            Y^0&\sim \text{Bernoulli}(p_0),\ p_0=E[\mathds{1}_{\mu + 0.03U + \gamma X + \beta W + \zeta Z + \epsilon_7 > 0}] \\
             Y &= \mathds{1}_{A=1}Y^1 + \mathds{1}_{A=0}Y^0 
         \end{aligned}$
     \end{tabular}
@@ -1458,3 +1432,38 @@ where $\epsilon_1,\cdots,\epsilon_7$ are i.i.d. from $\mathcal{N}(0,1)$.
     \label{tab: est_datageneration}
 \end{table}
 
+We control the coefficients $\alpha$, $\beta$ and $\gamma$ by 0.05 and test the value of $\zeta$ among $0, 0.05, 0.5, 2$.
+
+The first experiment tests the deviation of the p-value as $\zeta$ changes when the true ATE is 0.
+The result is given in Figure \ref{fig: QQ-plot}.
+It shows that as the common direct influence of the invalid proxies goes up,
+the observed p-value gradually becomes smaller than the expected p-value,
+meaning the increased chance of the error of the first kind of the model.
+
+The second experiment tests the prediction accuracy of the model featured by curves of ROC and TP/FP vs. FDR.
+Here, for each test point of $\zeta$,
+we set significance levels from 0.05 to 1 to maximally expand the range of FPR and FDR.
+Then, for each significance level, 
+we generate ground truth by 500 positive ATEs and 500 negative ATEs with observations of equal sample size 1000 respectively.
+The model subsequently compute ATEs from the dataset and record all true/false positive and true/false negative ones.
+The result is shown in Figure \ref{fig: ROC_AUC}.
+From the two curves, we have that as $\zeta$ rises to 2 which is non-negligible compared to the rest coefficients in the model,
+the prediction performance drops drastically.
+The ROC curve at $\zeta=2$ indicates a comparatively low TPR for all FPR.
+Combined with the overall decreased TP number and the right shifted starting points of TP/FP vs. FDR curve,
+the result witnesses the increment on the error of the first kind 
+when the direct influence of the proxies to the treatment and outcome that shouldn't have existed is large enough.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{figures/QQ-plot.pdf}
+    \caption{\centering QQ-plot for the p-value when true ATE is 0}
+    \label{fig: QQ-plot}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[angle=-90, totalheight=\textheight]{figures/ROC_FDR.pdf}
+    \caption{\centering The overall prediction accuracy of the model when proxies are invalid}
+    \label{fig: ROC_AUC}
+\end{figure}
